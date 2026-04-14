@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8d2d7a0fded246a48bb752de9b77d784, type: 3}
-  m_Name: Moth
+  m_Name: Ant
   m_EditorClassIdentifier: 
-  bugName: 
-  expiryDays: 0
+  bugName: Ant
+  expiryDays: 2
   buyPrice: 0
   sellPrice: 0
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 844f0a34e86120e42813e74b7a24f50d, type: 3}

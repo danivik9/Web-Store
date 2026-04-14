@@ -3,39 +3,10 @@ using UnityEngine;
 public class BugIconHover : MonoBehaviour
 {
     public ShelfSlot slot;
-    private Camera mainCamera;
 
-    void Start()
+    void OnMouseEnter()
     {
-        mainCamera = Camera.main;
-    }
-
-    void Update()
-    {
-        // Raycast from mouse position
-        Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
-        RaycastHit hit;
-
-        if (Physics.Raycast(ray, out hit))
-        {
-            if (hit.transform == transform)
-            {
-                ShowTooltip();
-            }
-            else
-            {
-                HideTooltip();
-            }
-        }
-        else
-        {
-            HideTooltip();
-        }
-    }
-
-    void ShowTooltip()
-    {
-        if (slot.bugToken == null) return;
+        if (slot == null || slot.bugToken == null) return;
 
         int currentRound = GameManager.Instance.currentRound;
         int daysLeft = slot.bugToken.DaysUntilExpiry(currentRound);
@@ -50,7 +21,7 @@ public class BugIconHover : MonoBehaviour
         );
     }
 
-    void HideTooltip()
+    void OnMouseExit()
     {
         UIManager.Instance.HideTooltip();
     }

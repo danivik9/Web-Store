@@ -5,6 +5,10 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
 
+    [Header("Test")]
+    public BugType testBugType;
+    public Shelf testShelf;
+
     [Header("Game State")]
     public int currentRound = 1;
     public int maxRounds = 6;
@@ -36,6 +40,9 @@ public class GameManager : MonoBehaviour
         UIManager.Instance.UpdateRoundDisplay(currentRound, maxRounds);
 
         StartPhase(GamePhase.Preparation);
+
+        BugToken testToken = new BugToken(testBugType, currentRound);
+        testShelf.AddBug(testToken);
     }
 
 

@@ -25,6 +25,14 @@ public class UIManager : MonoBehaviour
         tooltipPanel.SetActive(false);
     }
 
+    void Update()
+    {
+        if (tooltipPanel.activeSelf)
+        {
+            tooltipPanel.transform.position = Input.mousePosition + new Vector3(75f, 50f, 0f);
+        }
+    }
+
     public void ShowPrompt(string text)
     {
         promptText.text = text;
