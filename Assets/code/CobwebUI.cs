@@ -54,7 +54,8 @@ public class CobwebUI : MonoBehaviour
 
     public void OpenShop(CobwebCard card, CobwebManager manager)
     {
-        InteractionManager.IsLocked = true; // ← added
+        InteractionManager.IsLocked = true;
+        UIManager.Instance.HidePrompt(); // ← added
         currentCard = card;
         cobwebManager = manager;
 
@@ -94,7 +95,7 @@ public class CobwebUI : MonoBehaviour
 
     public void CloseShop()
     {
-        InteractionManager.IsLocked = false; // ← added
+        InteractionManager.IsLocked = false;
         cobwebManager.GetPendingOrder().Clear();
         storedPositions.Clear();
         UpdateWebDisplay(new List<BugType>());
