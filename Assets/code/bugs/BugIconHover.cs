@@ -1,28 +1,46 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 
-public class BugIconHover : MonoBehaviour
+public class BugIconHover : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
-    public ShelfSlot slot;
+    public BugToken bugToken;
 
+    // For 3D world icons (store shelves)
     void OnMouseEnter()
     {
-        if (slot == null || slot.bugToken == null) return;
+        ShowTooltip();
+    }
+
+    void OnMouseExit()
+    {
+        UIManager.Instance.HideTooltip();
+    }
+
+    // For UI elements (storage grid)
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        ShowTooltip();
+    }
+
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        UIManager.Instance.HideTooltip();
+    }
+
+    void ShowTooltip()
+    {
+        if (bugToken == null) return;
 
         int currentRound = GameManager.Instance.currentRound;
-        int daysLeft = slot.bugToken.DaysUntilExpiry(currentRound);
+        int daysLeft = bugToken.DaysUntilExpiry(currentRound);
 
         string expiryText = daysLeft == 99
             ? "Never expires"
             : $"Expires in {daysLeft} day(s)";
 
         UIManager.Instance.ShowTooltip(
-            slot.bugToken.bugType.bugName,
+            bugToken.bugType.bugName,
             expiryText
         );
-    }
-
-    void OnMouseExit()
-    {
-        UIManager.Instance.HideTooltip();
     }
 }

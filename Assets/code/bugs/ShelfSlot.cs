@@ -4,8 +4,7 @@ public class ShelfSlot : MonoBehaviour
 {
     [Header("Slot Settings")]
     public BugToken bugToken;
-    private bool occupied = false;
-    public bool isOccupied => occupied;
+    public bool isOccupied => bugToken != null;
 
     [Header("Visuals")]
     public GameObject iconObject;
@@ -17,7 +16,6 @@ public class ShelfSlot : MonoBehaviour
     {
         if (isOccupied) return false;
         bugToken = token;
-        occupied = true;
         SpawnIcon();
         return true;
     }
@@ -27,7 +25,6 @@ public class ShelfSlot : MonoBehaviour
         if (!isOccupied) return null;
         BugToken removed = bugToken;
         bugToken = null;
-        occupied = false;
         ClearIcon();
         return removed;
     }
@@ -40,7 +37,6 @@ public class ShelfSlot : MonoBehaviour
         iconObject = new GameObject("BugIcon");
         iconObject.transform.SetParent(transform);
         iconObject.transform.localPosition = Vector3.up * hoverHeight;
-        iconObject.transform.localScale = Vector3.one * 0.15f; // add this line
 
         spriteRenderer = iconObject.AddComponent<SpriteRenderer>();
         spriteRenderer.sprite = bugToken.bugType.icon;
@@ -49,8 +45,9 @@ public class ShelfSlot : MonoBehaviour
         iconObject.AddComponent<BoxCollider>();
         iconObject.AddComponent<FaceCamera>();
 
+        // Use BugToken directly now
         var hover = iconObject.AddComponent<BugIconHover>();
-        hover.slot = this;
+        hover.bugToken = bugToken;
     }
 
     void ClearIcon()

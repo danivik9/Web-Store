@@ -16,15 +16,19 @@ public class CarryDisplay : MonoBehaviour
 
     private List<GameObject> activeRows = new List<GameObject>();
     private Camera mainCamera;
+    private int carryDisplayLayer;
 
     void Awake()
     {
         Instance = this;
+        carryDisplayLayer = LayerMask.NameToLayer("CarryDisplay");
     }
 
     void Start()
     {
         mainCamera = Camera.main;
+        // Ensure the display root itself is on the correct layer
+        SetLayerRecursively(gameObject, carryDisplayLayer);
     }
 
     void LateUpdate()
@@ -50,6 +54,9 @@ public class CarryDisplay : MonoBehaviour
             row.transform.localPosition = new Vector3(0,
                 heightAboveSpider + (rowIndex * stackSpacing), 0);
 
+            // Put the row and all its children on the CarryDisplay layer
+            SetLayerRecursively(row, carryDisplayLayer);
+
             var img = row.transform.Find("BugSprite")?.GetComponent<SpriteRenderer>();
             if (img != null)
             {
@@ -67,5 +74,12 @@ public class CarryDisplay : MonoBehaviour
             activeRows.Add(row);
             rowIndex++;
         }
+    }
+
+    private void SetLayerRecursively(GameObject go, int layer)
+    {
+        go.layer = layer;
+        foreach (Transform child in go.transform)
+            SetLayerRecursively(child.gameObject, layer);
     }
 }
