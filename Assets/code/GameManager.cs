@@ -26,7 +26,6 @@ public class GameManager : MonoBehaviour
 
     void Awake()
     {
-        // Singleton
         if (Instance == null)
             Instance = this;
         else
@@ -35,16 +34,17 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        // Initialize UI displays
         UIManager.Instance.UpdateMoneyDisplay(currentMoney);
         UIManager.Instance.UpdateRoundDisplay(currentRound, maxRounds);
+
+        CobwebManager.Instance.ShuffleDeck();
+        CobwebManager.Instance.DrawNextCard();
 
         StartPhase(GamePhase.Preparation);
 
         BugToken testToken = new BugToken(testBugType, currentRound);
         testShelf.AddBug(testToken);
     }
-
 
     // ── Phase Control ──────────────────────────────
 
@@ -78,31 +78,35 @@ public class GameManager : MonoBehaviour
 
     void StartPreparation()
     {
-        Debug.Log($"Round {currentRound} — Preparation Phase");
+        Debug.Log($"Round {currentRound} - Preparation Phase");
+
+        if (currentRound > 1)
+            CobwebManager.Instance.DrawNextCard();
+
         onPreparationPhase?.Invoke();
     }
 
     void StartDelivery()
     {
-        Debug.Log($"Round {currentRound} — Delivery Phase");
+        Debug.Log($"Round {currentRound} - Delivery Phase");
         onDeliveryPhase?.Invoke();
     }
 
     void StartStocking()
     {
-        Debug.Log($"Round {currentRound} — Stocking Phase");
+        Debug.Log($"Round {currentRound} - Stocking Phase");
         onStockingPhase?.Invoke();
     }
 
     void StartCustomer()
     {
-        Debug.Log($"Round {currentRound} — Customer Phase");
+        Debug.Log($"Round {currentRound} - Customer Phase");
         onCustomerPhase?.Invoke();
     }
 
     void StartWaste()
     {
-        Debug.Log($"Round {currentRound} — Waste Phase");
+        Debug.Log($"Round {currentRound} - Waste Phase");
         onWastePhase?.Invoke();
     }
 
@@ -119,10 +123,9 @@ public class GameManager : MonoBehaviour
         }
 
         currentRound++;
-        UIManager.Instance.UpdateRoundDisplay(currentRound, maxRounds); // add this
+        UIManager.Instance.UpdateRoundDisplay(currentRound, maxRounds);
         StartPhase(GamePhase.Preparation);
     }
-
 
     // ── Money ──────────────────────────────────────
 
