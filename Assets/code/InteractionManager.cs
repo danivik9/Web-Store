@@ -1,17 +1,24 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class InteractionManager : MonoBehaviour
 {
     [Header("Settings")]
     public KeyCode interactKey = KeyCode.E;
 
+    public static bool IsLocked = false; // ← add this
+
     private IInteractable currentInteractable;
 
     void Update()
     {
-        if (currentInteractable != null && Input.GetKeyDown(interactKey))
+        if (IsLocked) return; // ← stop here when UI is open
+
+        if (currentInteractable != null)
         {
-            currentInteractable.Interact();
+            UIManager.Instance.ShowPrompt(currentInteractable.GetPromptText());
+
+            if (Input.GetKeyDown(interactKey))
+                currentInteractable.Interact();
         }
     }
 

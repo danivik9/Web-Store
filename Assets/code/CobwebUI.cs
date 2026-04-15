@@ -54,6 +54,7 @@ public class CobwebUI : MonoBehaviour
 
     public void OpenShop(CobwebCard card, CobwebManager manager)
     {
+        InteractionManager.IsLocked = true; // ← added
         currentCard = card;
         cobwebManager = manager;
 
@@ -67,7 +68,6 @@ public class CobwebUI : MonoBehaviour
         UpdateTotalCost(0f);
         collectButtonText.text = "Collect";
 
-        // Hook up buy buttons
         fruitFlyButton.onClick.RemoveAllListeners();
         antButton.onClick.RemoveAllListeners();
         mosquitoButton.onClick.RemoveAllListeners();
@@ -94,6 +94,7 @@ public class CobwebUI : MonoBehaviour
 
     public void CloseShop()
     {
+        InteractionManager.IsLocked = false; // ← added
         cobwebManager.GetPendingOrder().Clear();
         storedPositions.Clear();
         UpdateWebDisplay(new List<BugType>());

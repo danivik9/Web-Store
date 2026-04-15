@@ -57,6 +57,7 @@ public class StorageShelfUI : MonoBehaviour
 
     public void OpenShelf()
     {
+        InteractionManager.IsLocked = true; // ← added
         selectedTokens.Clear();
         storagePanel.SetActive(true);
 
@@ -75,6 +76,7 @@ public class StorageShelfUI : MonoBehaviour
 
     public void CloseShelf()
     {
+        InteractionManager.IsLocked = false; // ← added
         storagePanel.SetActive(false);
 
         spiderObject.SetActive(true);

@@ -1,16 +1,23 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class ShelfSlot : MonoBehaviour
 {
     [Header("Slot Settings")]
     public BugToken bugToken;
-    public bool isOccupied => bugToken != null;
+    public bool isOccupied => bugToken != null && bugToken.bugType != null; // ← fixed
 
     [Header("Visuals")]
     public GameObject iconObject;
     public float hoverHeight = 0.3f;
-
     private SpriteRenderer spriteRenderer;
+
+    public bool IsEmpty() => !isOccupied;
+
+    public void ClearSlot()
+    {
+        bugToken = null;
+        ClearIcon();
+    }
 
     public bool PlaceBug(BugToken token)
     {
@@ -37,6 +44,7 @@ public class ShelfSlot : MonoBehaviour
         iconObject = new GameObject("BugIcon");
         iconObject.transform.SetParent(transform);
         iconObject.transform.localPosition = Vector3.up * hoverHeight;
+        iconObject.transform.localScale = Vector3.one * 0.15f; // ← added
 
         spriteRenderer = iconObject.AddComponent<SpriteRenderer>();
         spriteRenderer.sprite = bugToken.bugType.icon;
@@ -45,7 +53,6 @@ public class ShelfSlot : MonoBehaviour
         iconObject.AddComponent<BoxCollider>();
         iconObject.AddComponent<FaceCamera>();
 
-        // Use BugToken directly now
         var hover = iconObject.AddComponent<BugIconHover>();
         hover.bugToken = bugToken;
     }

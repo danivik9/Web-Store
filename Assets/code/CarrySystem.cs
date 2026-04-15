@@ -1,17 +1,15 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
 
 public class CarrySystem : MonoBehaviour
 {
     public static int MAX_CARRY = 5;
 
-    // Tracks carried bugs � key is BugType, value is list of tokens
     private Dictionary<BugType, List<BugToken>> carriedBugs
         = new Dictionary<BugType, List<BugToken>>();
 
     private int totalCarried = 0;
 
-    // Try to pick up a bug token
     public bool PickUp(BugToken token)
     {
         if (totalCarried >= MAX_CARRY)
@@ -25,12 +23,10 @@ public class CarrySystem : MonoBehaviour
 
         carriedBugs[token.bugType].Add(token);
         totalCarried++;
-
         CarryDisplay.Instance.UpdateDisplay(carriedBugs);
         return true;
     }
 
-    // Remove one token of a specific bug type
     public BugToken TakeOne(BugType bugType)
     {
         if (!carriedBugs.ContainsKey(bugType)) return null;
@@ -46,6 +42,16 @@ public class CarrySystem : MonoBehaviour
         CarryDisplay.Instance.UpdateDisplay(carriedBugs);
         return token;
     }
+
+    // ── Added for Shelf.cs ──────────────────────────
+    public int GetCountOfType(BugType bugType)
+    {
+        if (!carriedBugs.ContainsKey(bugType)) return 0;
+        return carriedBugs[bugType].Count;
+    }
+
+    public BugToken TakeOneOfType(BugType bugType) => TakeOne(bugType);
+    // ───────────────────────────────────────────────
 
     public int TotalCarried() => totalCarried;
     public bool IsFull() => totalCarried >= MAX_CARRY;
