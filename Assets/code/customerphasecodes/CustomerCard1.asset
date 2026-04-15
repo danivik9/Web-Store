@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632547174a3b11340a13d6d0e124664f, type: 3}
+  m_Name: CustomerCard1
+  m_EditorClassIdentifier: 
+  customerName: Mouse
+  guaranteedBugType: {fileID: 11400000, guid: d9a263b3b9d838541981608bd3c1b563, type: 2}
+  guaranteedAmount: 1
+  randomRollCount: 2
+  diceTable:
+  - minRoll: 1
+    maxRoll: 3
+    bugType: {fileID: 11400000, guid: d1c81cf2530e69146bb9d3c72f43e86f, type: 2}
+  - minRoll: 4
+    maxRoll: 6
+    bugType: {fileID: 11400000, guid: 90e967b140a734e41a26634ab274a5ba, type: 2}
+  - minRoll: 7
+    maxRoll: 8
+    bugType: {fileID: 11400000, guid: 0a76e0056cff7044ab1fdb4f179c66ed, type: 2}
+  - minRoll: 9
+    maxRoll: 9
+    bugType: {fileID: 11400000, guid: acc2f137713a54d4a9913791eaa69e44, type: 2}
+  - minRoll: 10
+    maxRoll: 12
+    bugType: {fileID: 11400000, guid: d9a263b3b9d838541981608bd3c1b563, type: 2}
+  penalty: 10

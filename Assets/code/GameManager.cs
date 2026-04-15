@@ -101,11 +101,14 @@ public class GameManager : MonoBehaviour
     void StartCustomer()
     {
         Debug.Log($"Round {currentRound} - Customer Phase");
+        CustomerPhaseManager.Instance.StartCustomerPhase(); // ← added
         onCustomerPhase?.Invoke();
     }
 
     void StartWaste()
     {
+        // Waste is now handled inside DayBreakdownUI when Continue is clicked
+        // AdvancePhase from Waste calls EndRound directly
         Debug.Log($"Round {currentRound} - Waste Phase");
         onWastePhase?.Invoke();
     }
