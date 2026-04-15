@@ -19,7 +19,6 @@ public class CustomerPhaseManager : MonoBehaviour
     private int customersServed = 0;
     private int customersFailed = 0;
 
-    // ── Day tracking for breakdown ──
     private List<string> dayLog = new List<string>();
 
     void Awake()
@@ -40,7 +39,6 @@ public class CustomerPhaseManager : MonoBehaviour
         activeCustomer = null;
         storeOpen = false;
 
-        // Shuffle and pick 5 cards
         List<CustomerCard> shuffled = new List<CustomerCard>(allCards);
         for (int i = shuffled.Count - 1; i > 0; i--)
         {
@@ -87,17 +85,12 @@ public class CustomerPhaseManager : MonoBehaviour
             return false;
         }
 
-        // Remove a random customer from queue
         int removeIndex = Random.Range(0, customerQueue.Count);
         string removedName = customerQueue[removeIndex].customerName;
         customerQueue.RemoveAt(removeIndex);
         dayLog.Add($"Restocked — lost {removedName}");
 
         hasRestockedThisRound = true;
-
-        // Move all storage bugs to shelves automatically
-        // Player still needs to physically stock via carry system
-        // so just flag it and let StorageShelfUI handle the actual stocking
         Debug.Log("Restock triggered!");
         CustomerUI.Instance.ShowQueue(customerQueue);
         return true;
@@ -112,50 +105,49 @@ public class CustomerPhaseManager : MonoBehaviour
         CustomerUI.Instance.OpenCustomerOrder(card);
     }
 
-    // Called when player clicks a guaranteed item slot
     public bool PlaceItem(BugType bugType)
     {
-        // Find the shelf with this bug type
         Shelf[] shelves = FindObjectsOfType<Shelf>();
         foreach (Shelf shelf in shelves)
         {
             if (shelf.acceptedBugType == bugType)
             {
-                // Find an occupied slot and take from it
                 foreach (ShelfSlot slot in shelf.slots)
                 {
                     if (slot.isOccupied)
                     {
                         slot.RemoveBug();
                         itemsPlacedForCurrentCustomer.Add(bugType);
-                        roundEarnings += bugType.sellPrice;
                         return true;
                     }
                 }
             }
         }
 
-        // Not found on any shelf
         Debug.Log($"No {bugType.bugName} available on shelves!");
         return false;
     }
 
-    // Called by dice roll result
     public BugType RollForRandomItem()
     {
-        int roll = Random.Range(1, 7) + Random.Range(1, 7); // 2d6
+        int roll = Random.Range(1, 7) + Random.Range(1, 7);
         BugType result = activeCustomer.GetBugForRoll(roll);
-        Debug.Log($"Rolled {roll} → {(result != null ? result.bugName : "nothing")}");
+        Debug.Log($"Rolled {roll} -> {(result != null ? result.bugName : "nothing")}");
         return result;
     }
 
-    // Called when all slots filled successfully
     public void CompleteCustomer()
     {
+        // ← calculate once, use for both log and money
+        float earned = CalculateCustomerEarnings();
+
         customerQueue.Remove(activeCustomer);
         customersServed++;
-        dayLog.Add($"✓ Served {activeCustomer.customerName} — earned ${CalculateCustomerEarnings()}");
-        GameManager.Instance.EarnMoney(CalculateCustomerEarnings());
+        roundEarnings += earned;
+
+        dayLog.Add($"[SERVED] {activeCustomer.customerName} — earned ${earned:F2}");
+        GameManager.Instance.EarnMoney(earned);
+
         itemsPlacedForCurrentCustomer.Clear();
         activeCustomer = null;
 
@@ -166,20 +158,13 @@ public class CustomerPhaseManager : MonoBehaviour
             EndCustomerPhase();
     }
 
-    // Called when player hits Can't Serve
     public void FailCustomer()
     {
         customerQueue.Remove(activeCustomer);
         customersFailed++;
 
-        // Lose already placed items (already removed from shelves)
-        // Lose earnings already counted for this customer
-        float earned = CalculateCustomerEarnings();
-        roundEarnings -= earned;
-
-        // Apply penalty
         GameManager.Instance.SpendMoney(activeCustomer.penalty);
-        dayLog.Add($"✗ Failed {activeCustomer.customerName} — penalty -${activeCustomer.penalty}");
+        dayLog.Add($"[FAILED] {activeCustomer.customerName} — penalty -${activeCustomer.penalty:F2}");
 
         itemsPlacedForCurrentCustomer.Clear();
         activeCustomer = null;

@@ -13,7 +13,6 @@ public class CustomerUI : MonoBehaviour
     public Vector3 registerCameraRotation;
 
     [Header("References")]
-    public CameraFollow cameraFollow;
     public SpiderMovement spiderMovement;
 
     [Header("Queue Panel")]
@@ -41,6 +40,7 @@ public class CustomerUI : MonoBehaviour
     [Header("Dice Settings")]
     public float diceSpinDuration = 1.5f;
 
+    private CameraFollow cameraFollow;
     private GameObject spiderObject;
     private CustomerCard currentCard;
     private List<GameObject> guaranteedSlotObjects = new List<GameObject>();
@@ -49,6 +49,7 @@ public class CustomerUI : MonoBehaviour
 
     private int guaranteedFilled = 0;
     private int randomFilled = 0;
+    private int currentRandomRollIndex = 0;
     private bool isRolling = false;
 
     void Awake()
@@ -58,11 +59,13 @@ public class CustomerUI : MonoBehaviour
 
     void Start()
     {
+        cameraFollow = FindObjectOfType<CameraFollow>();
         spiderObject = spiderMovement.gameObject;
 
         queuePanel.SetActive(false);
         orderPanel.SetActive(false);
         stockStickyNote.SetActive(false);
+        restockButton.gameObject.SetActive(false);
 
         restockButton.onClick.AddListener(OnRestock);
         rollDiceButton.onClick.AddListener(() => StartCoroutine(RollDice()));
@@ -78,6 +81,10 @@ public class CustomerUI : MonoBehaviour
         spiderMovement.enabled = false;
         spiderObject.SetActive(false);
 
+        stockStickyNote.SetActive(true);
+        restockButton.gameObject.SetActive(true);
+        UpdateStockStickyNote();
+
         cameraFollow.PanToPosition(
             registerCameraPosition,
             Quaternion.Euler(registerCameraRotation)
@@ -90,6 +97,9 @@ public class CustomerUI : MonoBehaviour
         spiderObject.SetActive(true);
         spiderMovement.enabled = true;
         cameraFollow.ReturnToFollow();
+
+        stockStickyNote.SetActive(false);
+        restockButton.gameObject.SetActive(false);
     }
 
     // ── Queue ──────────────────────────────────────
@@ -97,7 +107,6 @@ public class CustomerUI : MonoBehaviour
     public void ShowQueue(List<CustomerCard> queue)
     {
         queuePanel.SetActive(true);
-        stockStickyNote.SetActive(true);
         UpdateStockStickyNote();
 
         for (int i = queueContainer.childCount - 1; i >= 0; i--)
@@ -113,7 +122,7 @@ public class CustomerUI : MonoBehaviour
 
             var guaranteedText = slot.transform.Find("GuaranteedText")?.GetComponent<TextMeshProUGUI>();
             if (guaranteedText != null)
-                guaranteedText.text = $"{card.guaranteedAmount}× {card.guaranteedBugType.bugName}";
+                guaranteedText.text = $"{card.guaranteedAmount}x {card.guaranteedBugType.bugName}";
 
             var icon = slot.transform.Find("BugIcon")?.GetComponent<Image>();
             if (icon != null) icon.sprite = card.guaranteedBugType.icon;
@@ -135,7 +144,6 @@ public class CustomerUI : MonoBehaviour
     public void CloseQueue()
     {
         queuePanel.SetActive(false);
-        stockStickyNote.SetActive(false);
         ReturnFromRegister();
     }
 
@@ -146,12 +154,15 @@ public class CustomerUI : MonoBehaviour
         currentCard = card;
         guaranteedFilled = 0;
         randomFilled = 0;
+        currentRandomRollIndex = 0;
+        isRolling = false;
         revealedRandomBugs.Clear();
 
         orderPanel.SetActive(true);
         customerNameText.text = card.customerName;
 
         rollDiceButton.gameObject.SetActive(false);
+        rollDiceButton.interactable = true;
         cantServeButton.gameObject.SetActive(true);
         diceResultText.text = "";
 
@@ -177,7 +188,11 @@ public class CustomerUI : MonoBehaviour
             GameObject slot = Instantiate(itemSlotPrefab, guaranteedSlotsContainer);
 
             var icon = slot.transform.Find("BugIcon")?.GetComponent<Image>();
-            if (icon != null) icon.sprite = card.guaranteedBugType.icon;
+            if (icon != null)
+            {
+                icon.sprite = card.guaranteedBugType.icon;
+                icon.color = new Color(1f, 1f, 1f, 0.35f); // ← semi-transparent until filled
+            }
 
             var label = slot.transform.Find("BugName")?.GetComponent<TextMeshProUGUI>();
             if (label != null) label.text = card.guaranteedBugType.bugName;
@@ -223,6 +238,9 @@ public class CustomerUI : MonoBehaviour
             var bg = slot.GetComponent<Image>();
             if (bg != null) bg.color = new Color(0.6f, 1f, 0.6f);
 
+            var icon = slot.transform.Find("BugIcon")?.GetComponent<Image>();
+            if (icon != null) icon.color = new Color(1f, 1f, 1f, 1f); // ← fully opaque
+
             var btn = slot.GetComponent<Button>();
             if (btn != null) btn.interactable = false;
 
@@ -231,8 +249,16 @@ public class CustomerUI : MonoBehaviour
 
             if (guaranteedFilled >= currentCard.guaranteedAmount)
             {
-                rollDiceButton.gameObject.SetActive(true);
-                diceResultText.text = "Roll for mystery items!";
+                if (currentCard.randomRollCount > 0)
+                {
+                    rollDiceButton.gameObject.SetActive(true);
+                    rollDiceButton.interactable = true;
+                    diceResultText.text = "Roll for mystery items!";
+                }
+                else
+                {
+                    CustomerPhaseManager.Instance.CompleteCustomer();
+                }
             }
         }
         else
@@ -250,6 +276,9 @@ public class CustomerUI : MonoBehaviour
             var bg = slot.GetComponent<Image>();
             if (bg != null) bg.color = new Color(0.6f, 1f, 0.6f);
 
+            var icon = slot.transform.Find("BugIcon")?.GetComponent<Image>();
+            if (icon != null) icon.color = new Color(1f, 1f, 1f, 1f); // ← fully opaque
+
             var btn = slot.GetComponent<Button>();
             if (btn != null) btn.interactable = false;
 
@@ -257,7 +286,15 @@ public class CustomerUI : MonoBehaviour
             UpdateStockStickyNote();
 
             if (randomFilled >= currentCard.randomRollCount)
+            {
                 CustomerPhaseManager.Instance.CompleteCustomer();
+            }
+            else
+            {
+                rollDiceButton.gameObject.SetActive(true);
+                rollDiceButton.interactable = true;
+                diceResultText.text = "Roll for next item!";
+            }
         }
         else
         {
@@ -276,54 +313,53 @@ public class CustomerUI : MonoBehaviour
         float elapsed = 0f;
         while (elapsed < diceSpinDuration)
         {
-            int fakeRoll = Random.Range(2, 13);
-            diceResultText.text = $"🎲 {fakeRoll}";
+            diceResultText.text = $"Rolling... {Random.Range(2, 13)}";
             elapsed += 0.1f;
             yield return new WaitForSeconds(0.1f);
         }
 
-        revealedRandomBugs.Clear();
-        for (int i = 0; i < currentCard.randomRollCount; i++)
+        BugType result = CustomerPhaseManager.Instance.RollForRandomItem();
+        revealedRandomBugs.Add(result);
+
+        int index = currentRandomRollIndex;
+
+        if (index < randomSlotObjects.Count)
         {
-            BugType result = CustomerPhaseManager.Instance.RollForRandomItem();
-            revealedRandomBugs.Add(result);
+            GameObject oldSlot = randomSlotObjects[index];
+            Transform parent = oldSlot.transform.parent;
+            Destroy(oldSlot);
 
-            if (i < randomSlotObjects.Count)
+            GameObject newSlot = Instantiate(itemSlotPrefab, parent);
+            randomSlotObjects[index] = newSlot;
+
+            if (result != null)
             {
-                GameObject oldSlot = randomSlotObjects[i];
-                Transform parent = oldSlot.transform.parent;
-                Destroy(oldSlot);
-
-                GameObject newSlot = Instantiate(itemSlotPrefab, parent);
-                randomSlotObjects[i] = newSlot;
-
-                if (result != null)
+                var icon = newSlot.transform.Find("BugIcon")?.GetComponent<Image>();
+                if (icon != null)
                 {
-                    var icon = newSlot.transform.Find("BugIcon")?.GetComponent<Image>();
-                    if (icon != null) icon.sprite = result.icon;
-
-                    var label = newSlot.transform.Find("BugName")?.GetComponent<TextMeshProUGUI>();
-                    if (label != null) label.text = result.bugName;
-
-                    var bg = newSlot.GetComponent<Image>();
-                    if (bg != null) bg.color = new Color(1f, 0.9f, 0.6f);
-
-                    BugType capturedBug = result;
-                    GameObject capturedSlot = newSlot;
-                    var btn = newSlot.GetComponent<Button>();
-                    if (btn != null)
-                        btn.onClick.AddListener(() => OnClickRandomSlot(capturedBug, capturedSlot));
+                    icon.sprite = result.icon;
+                    icon.color = new Color(1f, 1f, 1f, 0.35f); // ← semi-transparent until clicked
                 }
 
-                yield return new WaitForSeconds(0.4f);
+                var label = newSlot.transform.Find("BugName")?.GetComponent<TextMeshProUGUI>();
+                if (label != null) label.text = result.bugName;
+
+                var bg = newSlot.GetComponent<Image>();
+                if (bg != null) bg.color = new Color(1f, 0.9f, 0.6f);
+
+                BugType capturedBug = result;
+                GameObject capturedSlot = newSlot;
+                var btn = newSlot.GetComponent<Button>();
+                if (btn != null)
+                    btn.onClick.AddListener(() => OnClickRandomSlot(capturedBug, capturedSlot));
+
+                diceResultText.text = $"Rolled {result.bugName}!";
             }
         }
 
-        rollDiceButton.gameObject.SetActive(false);
+        currentRandomRollIndex++;
         isRolling = false;
-
-        if (currentCard.randomRollCount == 0)
-            CustomerPhaseManager.Instance.CompleteCustomer();
+        rollDiceButton.gameObject.SetActive(false);
     }
 
     // ── Can't Serve ────────────────────────────────
@@ -339,10 +375,7 @@ public class CustomerUI : MonoBehaviour
     {
         bool success = CustomerPhaseManager.Instance.TryRestock();
         if (success)
-        {
-            restockButton.interactable = false;
-            restockButtonText.text = "Restocked";
-        }
+            CloseQueue();
     }
 
     // ── Stock Sticky Note ──────────────────────────

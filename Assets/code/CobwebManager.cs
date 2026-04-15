@@ -58,10 +58,16 @@ public class CobwebManager : MonoBehaviour, IInteractable
 
     // ── Interactable ───────────────────────────────
 
-    public string GetPromptText() => "Press E to open Cobweb Shop";
+    public string GetPromptText()
+    {
+        if (GameManager.Instance.currentPhase != GamePhase.Preparation)
+            return "Shop is closed";
+        return "Press E to open Cobweb Shop";
+    }
 
     public void Interact()
     {
+        if (GameManager.Instance.currentPhase != GamePhase.Preparation) return;
         pendingOrder.Clear();
         CobwebUI.Instance.OpenShop(currentCard, this);
     }

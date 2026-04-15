@@ -6,12 +6,15 @@ public class Register : MonoBehaviour, IInteractable
     {
         if (!CustomerPhaseManager.Instance.storeOpen)
             return "Open the store door first";
+        if (CustomerPhaseManager.Instance.HasActiveCustomer())
+            return "Currently serving a customer";
         return "Press E to go to register";
     }
 
     public void Interact()
     {
         if (!CustomerPhaseManager.Instance.storeOpen) return;
+        if (CustomerPhaseManager.Instance.HasActiveCustomer()) return;
         CustomerUI.Instance.PanToRegister();
         CustomerUI.Instance.ShowQueue(CustomerPhaseManager.Instance.GetQueue());
     }

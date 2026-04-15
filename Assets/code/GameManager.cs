@@ -17,10 +17,8 @@ public class GameManager : MonoBehaviour
 
     [Header("Events")]
     public UnityEvent onPreparationPhase;
-    public UnityEvent onDeliveryPhase;
-    public UnityEvent onStockingPhase;
     public UnityEvent onCustomerPhase;
-    public UnityEvent onWastePhase;
+    public UnityEvent onBreakdownPhase;
     public UnityEvent onGameOver;
     public UnityEvent onGameWin;
 
@@ -55,10 +53,8 @@ public class GameManager : MonoBehaviour
         switch (phase)
         {
             case GamePhase.Preparation: StartPreparation(); break;
-            case GamePhase.Delivery: StartDelivery(); break;
-            case GamePhase.Stocking: StartStocking(); break;
             case GamePhase.Customer: StartCustomer(); break;
-            case GamePhase.Waste: StartWaste(); break;
+            case GamePhase.Breakdown: StartBreakdown(); break;
         }
     }
 
@@ -66,11 +62,9 @@ public class GameManager : MonoBehaviour
     {
         switch (currentPhase)
         {
-            case GamePhase.Preparation: StartPhase(GamePhase.Delivery); break;
-            case GamePhase.Delivery: StartPhase(GamePhase.Stocking); break;
-            case GamePhase.Stocking: StartPhase(GamePhase.Customer); break;
-            case GamePhase.Customer: StartPhase(GamePhase.Waste); break;
-            case GamePhase.Waste: EndRound(); break;
+            case GamePhase.Preparation: StartPhase(GamePhase.Customer); break;
+            case GamePhase.Customer: StartPhase(GamePhase.Breakdown); break;
+            case GamePhase.Breakdown: EndRound(); break;
         }
     }
 
@@ -86,31 +80,17 @@ public class GameManager : MonoBehaviour
         onPreparationPhase?.Invoke();
     }
 
-    void StartDelivery()
-    {
-        Debug.Log($"Round {currentRound} - Delivery Phase");
-        onDeliveryPhase?.Invoke();
-    }
-
-    void StartStocking()
-    {
-        Debug.Log($"Round {currentRound} - Stocking Phase");
-        onStockingPhase?.Invoke();
-    }
-
     void StartCustomer()
     {
         Debug.Log($"Round {currentRound} - Customer Phase");
-        CustomerPhaseManager.Instance.StartCustomerPhase(); // ← added
+        CustomerPhaseManager.Instance.StartCustomerPhase();
         onCustomerPhase?.Invoke();
     }
 
-    void StartWaste()
+    void StartBreakdown()
     {
-        // Waste is now handled inside DayBreakdownUI when Continue is clicked
-        // AdvancePhase from Waste calls EndRound directly
-        Debug.Log($"Round {currentRound} - Waste Phase");
-        onWastePhase?.Invoke();
+        Debug.Log($"Round {currentRound} - Breakdown Phase");
+        onBreakdownPhase?.Invoke();
     }
 
     // ── Round Control ──────────────────────────────
