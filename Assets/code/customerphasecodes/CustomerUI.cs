@@ -12,6 +12,10 @@ public class CustomerUI : MonoBehaviour
     public Vector3 registerCameraPosition;
     public Vector3 registerCameraRotation;
 
+    [Header("References")]
+    public CameraFollow cameraFollow;
+    public SpiderMovement spiderMovement;
+
     [Header("Queue Panel")]
     public GameObject queuePanel;
     public Transform queueContainer;
@@ -37,10 +41,7 @@ public class CustomerUI : MonoBehaviour
     [Header("Dice Settings")]
     public float diceSpinDuration = 1.5f;
 
-    private CameraFollow cameraFollow;
-    private SpiderMovement spiderMovement;
     private GameObject spiderObject;
-
     private CustomerCard currentCard;
     private List<GameObject> guaranteedSlotObjects = new List<GameObject>();
     private List<GameObject> randomSlotObjects = new List<GameObject>();
@@ -48,7 +49,6 @@ public class CustomerUI : MonoBehaviour
 
     private int guaranteedFilled = 0;
     private int randomFilled = 0;
-    private bool randomRevealed = false;
     private bool isRolling = false;
 
     void Awake()
@@ -58,8 +58,6 @@ public class CustomerUI : MonoBehaviour
 
     void Start()
     {
-        cameraFollow = FindObjectOfType<CameraFollow>();
-        spiderMovement = FindObjectOfType<SpiderMovement>();
         spiderObject = spiderMovement.gameObject;
 
         queuePanel.SetActive(false);
@@ -102,7 +100,6 @@ public class CustomerUI : MonoBehaviour
         stockStickyNote.SetActive(true);
         UpdateStockStickyNote();
 
-        // Clear old slots
         for (int i = queueContainer.childCount - 1; i >= 0; i--)
             Destroy(queueContainer.GetChild(i).gameObject);
 
@@ -111,26 +108,21 @@ public class CustomerUI : MonoBehaviour
             GameObject slot = Instantiate(customerQueueSlotPrefab, queueContainer);
             CustomerCard captured = card;
 
-            // Name label
             var nameText = slot.transform.Find("CustomerName")?.GetComponent<TextMeshProUGUI>();
             if (nameText != null) nameText.text = card.customerName;
 
-            // Guaranteed item preview
             var guaranteedText = slot.transform.Find("GuaranteedText")?.GetComponent<TextMeshProUGUI>();
             if (guaranteedText != null)
                 guaranteedText.text = $"{card.guaranteedAmount}× {card.guaranteedBugType.bugName}";
 
-            // Guaranteed item icon
             var icon = slot.transform.Find("BugIcon")?.GetComponent<Image>();
             if (icon != null) icon.sprite = card.guaranteedBugType.icon;
 
-            // Click to serve
             var btn = slot.GetComponent<Button>();
             if (btn != null)
                 btn.onClick.AddListener(() => CustomerPhaseManager.Instance.SelectCustomer(captured));
         }
 
-        // Restock button
         bool canRestock = !CustomerPhaseManager.Instance.hasRestockedThisRound
             && queue.Count > 0
             && StorageInventory.Instance.GetCount() > 0;
@@ -154,7 +146,6 @@ public class CustomerUI : MonoBehaviour
         currentCard = card;
         guaranteedFilled = 0;
         randomFilled = 0;
-        randomRevealed = false;
         revealedRandomBugs.Clear();
 
         orderPanel.SetActive(true);
@@ -191,7 +182,6 @@ public class CustomerUI : MonoBehaviour
             var label = slot.transform.Find("BugName")?.GetComponent<TextMeshProUGUI>();
             if (label != null) label.text = card.guaranteedBugType.bugName;
 
-            // Highlight as unfilled
             var bg = slot.GetComponent<Image>();
             if (bg != null) bg.color = new Color(1f, 0.9f, 0.6f);
 
@@ -230,7 +220,6 @@ public class CustomerUI : MonoBehaviour
 
         if (success)
         {
-            // Mark slot as filled
             var bg = slot.GetComponent<Image>();
             if (bg != null) bg.color = new Color(0.6f, 1f, 0.6f);
 
@@ -240,7 +229,6 @@ public class CustomerUI : MonoBehaviour
             guaranteedFilled++;
             UpdateStockStickyNote();
 
-            // All guaranteed filled → show roll button
             if (guaranteedFilled >= currentCard.guaranteedAmount)
             {
                 rollDiceButton.gameObject.SetActive(true);
@@ -249,7 +237,6 @@ public class CustomerUI : MonoBehaviour
         }
         else
         {
-            // Can't fulfill — flash red
             StartCoroutine(FlashSlotRed(slot));
         }
     }
@@ -269,7 +256,6 @@ public class CustomerUI : MonoBehaviour
             randomFilled++;
             UpdateStockStickyNote();
 
-            // All random filled → complete customer
             if (randomFilled >= currentCard.randomRollCount)
                 CustomerPhaseManager.Instance.CompleteCustomer();
         }
@@ -287,7 +273,6 @@ public class CustomerUI : MonoBehaviour
         isRolling = true;
         rollDiceButton.interactable = false;
 
-        // Spin animation — cycle through random numbers
         float elapsed = 0f;
         while (elapsed < diceSpinDuration)
         {
@@ -297,21 +282,15 @@ public class CustomerUI : MonoBehaviour
             yield return new WaitForSeconds(0.1f);
         }
 
-        // Reveal random items one by one
         revealedRandomBugs.Clear();
         for (int i = 0; i < currentCard.randomRollCount; i++)
         {
             BugType result = CustomerPhaseManager.Instance.RollForRandomItem();
             revealedRandomBugs.Add(result);
 
-            int roll = Random.Range(2, 13); // visual only — real roll is in manager
-            diceResultText.text = $"🎲 Rolled {roll}!";
-
-            // Replace hidden slot with revealed slot
             if (i < randomSlotObjects.Count)
             {
                 GameObject oldSlot = randomSlotObjects[i];
-                Vector2 position = oldSlot.GetComponent<RectTransform>().anchoredPosition;
                 Transform parent = oldSlot.transform.parent;
                 Destroy(oldSlot);
 
@@ -343,7 +322,6 @@ public class CustomerUI : MonoBehaviour
         rollDiceButton.gameObject.SetActive(false);
         isRolling = false;
 
-        // If randomRollCount is 0 complete immediately
         if (currentCard.randomRollCount == 0)
             CustomerPhaseManager.Instance.CompleteCustomer();
     }

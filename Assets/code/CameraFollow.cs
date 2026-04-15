@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class CameraFollow : MonoBehaviour
 {
@@ -42,19 +42,16 @@ public class CameraFollow : MonoBehaviour
         else
         {
             if (target == null) return;
-
             Vector3 targetPosition = new Vector3(
                 target.position.x + offset.x,
                 originalY,
                 originalZ
             );
-
             transform.position = Vector3.Lerp(
                 transform.position,
                 targetPosition,
                 returnSpeed * Time.deltaTime
             );
-
             transform.rotation = Quaternion.Slerp(
                 transform.rotation,
                 defaultRotation,
@@ -65,6 +62,7 @@ public class CameraFollow : MonoBehaviour
 
     public void PanToPosition(Vector3 position, Quaternion rotation)
     {
+        Debug.Log($"PanToPosition called: {position}"); // ← added
         pannedPosition = position;
         pannedRotation = rotation;
         isPanned = true;
@@ -72,6 +70,7 @@ public class CameraFollow : MonoBehaviour
 
     public void ReturnToFollow()
     {
+        Debug.Log("ReturnToFollow called!"); // ← added
         isPanned = false;
     }
 }
