@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: CustomerCard1
   m_EditorClassIdentifier: 
   customerName: Mouse
+  customerPrefab: {fileID: 3596850251295346751, guid: 580d1abe9bc303048a940d317e5b051c, type: 3}
   guaranteedBugType: {fileID: 11400000, guid: d9a263b3b9d838541981608bd3c1b563, type: 2}
   guaranteedAmount: 1
   randomRollCount: 2

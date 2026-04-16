@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: CustomerCard3
   m_EditorClassIdentifier: 
   customerName: Headhog
+  customerPrefab: {fileID: 6412103344986960996, guid: 88c179955348ac04ba1e7012dce1939b, type: 3}
   guaranteedBugType: {fileID: 11400000, guid: d1c81cf2530e69146bb9d3c72f43e86f, type: 2}
   guaranteedAmount: 2
   randomRollCount: 3

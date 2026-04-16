@@ -62,6 +62,7 @@ public class CustomerPhaseManager : MonoBehaviour
     {
         storeOpen = true;
         Debug.Log("Store is open!");
+        CustomerSpawner.Instance.SpawnCustomers(customerQueue); // ← added
         CustomerUI.Instance.ShowQueue(customerQueue);
     }
 
@@ -102,6 +103,7 @@ public class CustomerPhaseManager : MonoBehaviour
     {
         activeCustomer = card;
         itemsPlacedForCurrentCustomer.Clear();
+        CustomerSpawner.Instance.MoveCustomerToRegister(card); // ← added
         CustomerUI.Instance.OpenCustomerOrder(card);
     }
 
@@ -138,7 +140,6 @@ public class CustomerPhaseManager : MonoBehaviour
 
     public void CompleteCustomer()
     {
-        // ← calculate once, use for both log and money
         float earned = CalculateCustomerEarnings();
 
         customerQueue.Remove(activeCustomer);
@@ -147,6 +148,8 @@ public class CustomerPhaseManager : MonoBehaviour
 
         dayLog.Add($"[SERVED] {activeCustomer.customerName} — earned ${earned:F2}");
         GameManager.Instance.EarnMoney(earned);
+
+        CustomerSpawner.Instance.DespawnCustomer(activeCustomer); // ← added
 
         itemsPlacedForCurrentCustomer.Clear();
         activeCustomer = null;
@@ -166,6 +169,8 @@ public class CustomerPhaseManager : MonoBehaviour
         GameManager.Instance.SpendMoney(activeCustomer.penalty);
         dayLog.Add($"[FAILED] {activeCustomer.customerName} — penalty -${activeCustomer.penalty:F2}");
 
+        CustomerSpawner.Instance.DespawnCustomer(activeCustomer); // ← added
+
         itemsPlacedForCurrentCustomer.Clear();
         activeCustomer = null;
 
@@ -181,6 +186,7 @@ public class CustomerPhaseManager : MonoBehaviour
     void EndCustomerPhase()
     {
         storeOpen = false;
+        CustomerSpawner.Instance.DespawnAll(); // ← added
         Debug.Log("Customer phase complete!");
         CustomerUI.Instance.CloseQueue();
         DayBreakdownUI.Instance.ShowBreakdown(

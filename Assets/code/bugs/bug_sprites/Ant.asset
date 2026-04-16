@@ -14,6 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bugName: Ant
   expiryDays: 2
-  buyPrice: 0
-  sellPrice: 0
+  buyPrice: 4
+  sellPrice: 4
   icon: {fileID: 21300000, guid: 844f0a34e86120e42813e74b7a24f50d, type: 3}

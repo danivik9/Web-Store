@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: CustomerCard4
   m_EditorClassIdentifier: 
   customerName: Bird
+  customerPrefab: {fileID: 2521788235760522689, guid: 302c41dedf8f92541a3a48762e402eeb, type: 3}
   guaranteedBugType: {fileID: 11400000, guid: d9a263b3b9d838541981608bd3c1b563, type: 2}
   guaranteedAmount: 1
   randomRollCount: 2

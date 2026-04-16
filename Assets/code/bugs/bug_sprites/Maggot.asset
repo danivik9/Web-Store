@@ -14,6 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bugName: Maggot
   expiryDays: 4
-  buyPrice: 1
-  sellPrice: 1
+  buyPrice: 10
+  sellPrice: 10
   icon: {fileID: 21300000, guid: 484063deb53ea6048b043a87b73f0fe4, type: 3}

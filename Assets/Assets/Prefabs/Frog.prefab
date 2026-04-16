@@ -22,23 +22,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 74302ee6b55f9084494793461395382d, type: 3}
       propertyPath: m_LocalRotation.w
-      value: -0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 74302ee6b55f9084494793461395382d, type: 3}
-      propertyPath: m_LocalRotation.x
       value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 74302ee6b55f9084494793461395382d, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: -0.49999997
-      objectReference: {fileID: 0}
-    - target: {fileID: -8679921383154817045, guid: 74302ee6b55f9084494793461395382d, type: 3}
-      propertyPath: m_LocalRotation.z
+      propertyPath: m_LocalRotation.x
       value: -0.5
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 74302ee6b55f9084494793461395382d, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 74302ee6b55f9084494793461395382d, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 74302ee6b55f9084494793461395382d, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
+      value: -90
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 74302ee6b55f9084494793461395382d, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
@@ -46,7 +46,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 74302ee6b55f9084494793461395382d, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
+      value: 90
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 74302ee6b55f9084494793461395382d, type: 3}
       propertyPath: m_Name
@@ -61,7 +61,10 @@ PrefabInstance:
       addedObject: {fileID: 7974279980181927983}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 74302ee6b55f9084494793461395382d, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 8531449622587335923}
+      addedObject: {fileID: -5557728191379503724}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 74302ee6b55f9084494793461395382d, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6774419658058260549}
   m_SourcePrefab: {fileID: 100100000, guid: 74302ee6b55f9084494793461395382d, type: 3}
 --- !u!1 &9048104448900236790 stripped
 GameObject:
@@ -89,30 +92,38 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 0.032082297, y: 0.034035046, z: 0.026891975}
   m_Center: {x: 0.0018797608, y: 0.00034932367, z: 0.0026763603}
---- !u!54 &8531449622587335923
-Rigidbody:
+--- !u!114 &-5557728191379503724
+MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9048104448900236790}
-  serializedVersion: 4
-  m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
-  m_CenterOfMass: {x: 0, y: 0, z: 0}
-  m_InertiaTensor: {x: 1, y: 1, z: 1}
-  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ImplicitCom: 1
-  m_ImplicitTensor: 1
-  m_UseGravity: 1
-  m_IsKinematic: 0
-  m_Interpolate: 0
-  m_Constraints: 0
-  m_CollisionDetection: 0
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b79f7ae1e3aacf44ca6bf7ea05681889, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  moveSpeed: 2
+--- !u!195 &6774419658058260549
+NavMeshAgent:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9048104448900236790}
+  m_Enabled: 1
+  m_AgentTypeID: 0
+  m_Radius: 0.018095545
+  m_Speed: 3.5
+  m_Acceleration: 8
+  avoidancePriority: 50
+  m_AngularSpeed: 120
+  m_StoppingDistance: 0
+  m_AutoTraverseOffMeshLink: 1
+  m_AutoBraking: 1
+  m_AutoRepath: 1
+  m_Height: 0.024952738
+  m_BaseOffset: 0.012476369
+  m_WalkableMask: 4294967295
+  m_ObstacleAvoidanceType: 4
