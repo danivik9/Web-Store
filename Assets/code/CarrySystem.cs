@@ -43,7 +43,13 @@ public class CarrySystem : MonoBehaviour
         return token;
     }
 
-    // ── Added for Shelf.cs ──────────────────────────
+    public void ClearAll() // ← added
+    {
+        carriedBugs.Clear();
+        totalCarried = 0;
+        CarryDisplay.Instance.UpdateDisplay(carriedBugs);
+    }
+
     public int GetCountOfType(BugType bugType)
     {
         if (!carriedBugs.ContainsKey(bugType)) return 0;
@@ -51,7 +57,6 @@ public class CarrySystem : MonoBehaviour
     }
 
     public BugToken TakeOneOfType(BugType bugType) => TakeOne(bugType);
-    // ───────────────────────────────────────────────
 
     public int TotalCarried() => totalCarried;
     public bool IsFull() => totalCarried >= MAX_CARRY;
