@@ -189,6 +189,7 @@ public class CustomerPhaseManager : MonoBehaviour
         CustomerSpawner.Instance.DespawnAll();
         Debug.Log("Customer phase complete!");
         CustomerUI.Instance.CloseQueue();
+        GameManager.Instance.StartPhase(GamePhase.Breakdown); // ← add this
         DayBreakdownUI.Instance.ShowBreakdown(
             customersServed,
             customersFailed,

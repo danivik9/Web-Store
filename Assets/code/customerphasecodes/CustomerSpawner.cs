@@ -7,7 +7,7 @@ public class CustomerSpawner : MonoBehaviour
     public static CustomerSpawner Instance;
 
     [Header("Prefabs")]
-    public GameObject[] customerPrefabs; // fallback if card has no prefab assigned
+    public GameObject[] customerPrefabs;
 
     [Header("Spots")]
     public Transform spawnPoint;
@@ -39,7 +39,6 @@ public class CustomerSpawner : MonoBehaviour
 
     void SpawnCustomer(CustomerCard card)
     {
-        // use card's prefab, fallback to random if not assigned
         GameObject prefab = card.customerPrefab != null
             ? card.customerPrefab
             : customerPrefabs[Random.Range(0, customerPrefabs.Length)];
@@ -74,7 +73,11 @@ public class CustomerSpawner : MonoBehaviour
     {
         Customer customer = GetCustomerByCard(card);
         if (customer == null) return;
-        customer.MoveTo(registerSpot.position);
+
+        customer.MoveTo(registerSpot.position, () =>
+        {
+            customer.transform.rotation = Quaternion.Euler(0, 0, 0);
+        });
     }
 
     public void DespawnCustomer(CustomerCard card)
@@ -91,6 +94,18 @@ public class CustomerSpawner : MonoBehaviour
         });
     }
 
+    public void WalkAllOut() // ← new method
+    {
+        foreach (Customer c in activeCustomers)
+        {
+            if (c != null)
+                c.MoveTo(spawnPoint.position, () => Destroy(c.gameObject));
+        }
+
+        activeCustomers.Clear();
+        for (int i = 0; i < spotOccupied.Length; i++)
+            spotOccupied[i] = false;
+    }
 
     public void DespawnAll()
     {

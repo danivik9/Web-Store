@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Collections;
 using System.Collections.Generic;
 
 public class DayBreakdownUI : MonoBehaviour
@@ -22,9 +23,16 @@ public class DayBreakdownUI : MonoBehaviour
     [Header("Button")]
     public Button continueButton;
 
-    private float pendingEarnings = 0f;
-    private float pendingPenalties = 0f;
+    [Header("Spider Reset")]
+    public Transform spiderResetPosition;
+
+    [Header("Typewriter Settings")]
+    public float typewriterSpeed = 0.03f; // ← lower = faster
+
     private float expiredPenalty = 0f;
+    private float totalEarnings = 0f;
+    private float totalPenalties = 0f;
+    private bool isTyping = false;
 
     void Awake()
     {
@@ -42,30 +50,80 @@ public class DayBreakdownUI : MonoBehaviour
         breakdownPanel.SetActive(true);
         InteractionManager.IsLocked = true;
 
-        pendingEarnings = earnings;
-        pendingPenalties = GameManager.Instance.GetPendingPenalties();
-
-        // Process waste
         int expiredCount = StorageInventory.Instance.ProcessWaste(GameManager.Instance.currentRound);
         int shelfExpiredCount = ProcessShelfWaste();
         int totalExpired = expiredCount + shelfExpiredCount;
         expiredPenalty = totalExpired * 1f;
 
-        float net = pendingEarnings - pendingPenalties - expiredPenalty;
+        totalPenalties = GameManager.Instance.GetPendingPenalties() + expiredPenalty;
+        totalEarnings = earnings;
 
-        // Fill UI
-        customersServedText.text = $"Customers Served: {served}";
-        customersFailedText.text = $"Customers Failed: {failed}";
-        roundEarningsText.text = $"Sales Earnings: ${earnings:F2}";
-        expiredItemsText.text = $"Expired Items: {totalExpired}";
-        expiredPenaltyText.text = $"Expiry Penalty: -${expiredPenalty:F2}";
-        netResultText.text = $"Net This Round: ${net:F2}";
+        float net = totalEarnings - totalPenalties;
 
-        // Day log
+        // Disable continue button until typing is done
+        continueButton.interactable = false;
+
+        // Clear all text first
+        customersServedText.text = "";
+        customersFailedText.text = "";
+        roundEarningsText.text = "";
+        expiredItemsText.text = "";
+        expiredPenaltyText.text = "";
+        netResultText.text = "";
+        dayLogText.text = "";
+
+        // Build log string
         string logText = "--- LOG ---\n";
         foreach (string entry in log)
             logText += entry + "\n";
-        dayLogText.text = logText;
+
+        // Start typewriter sequence
+        StartCoroutine(TypewriterSequence(
+            served, failed, earnings,
+            totalExpired, expiredPenalty,
+            net, logText
+        ));
+    }
+
+    IEnumerator TypewriterSequence(
+        int served, int failed, float earnings,
+        int totalExpired, float expPenalty,
+        float net, string logText)
+    {
+        isTyping = true;
+
+        yield return StartCoroutine(TypeText(customersServedText, $"Customers Served: {served}"));
+        yield return new WaitForSeconds(0.1f);
+
+        yield return StartCoroutine(TypeText(customersFailedText, $"Customers Failed: {failed}"));
+        yield return new WaitForSeconds(0.1f);
+
+        yield return StartCoroutine(TypeText(roundEarningsText, $"Sales Earnings: ${earnings:F2}"));
+        yield return new WaitForSeconds(0.1f);
+
+        yield return StartCoroutine(TypeText(expiredItemsText, $"Expired Items: {totalExpired}"));
+        yield return new WaitForSeconds(0.1f);
+
+        yield return StartCoroutine(TypeText(expiredPenaltyText, $"Expiry Penalty: -${expPenalty:F2}"));
+        yield return new WaitForSeconds(0.1f);
+
+        yield return StartCoroutine(TypeText(netResultText, $"Net This Round: ${net:F2}"));
+        yield return new WaitForSeconds(0.2f);
+
+        yield return StartCoroutine(TypeText(dayLogText, logText));
+
+        isTyping = false;
+        continueButton.interactable = true; // ← enable continue only when done
+    }
+
+    IEnumerator TypeText(TextMeshProUGUI textField, string fullText)
+    {
+        textField.text = "";
+        foreach (char c in fullText)
+        {
+            textField.text += c;
+            yield return new WaitForSeconds(typewriterSpeed);
+        }
     }
 
     int ProcessShelfWaste()
@@ -93,18 +151,40 @@ public class DayBreakdownUI : MonoBehaviour
 
     void OnContinue()
     {
+        if (isTyping) return; // safety check
+
         if (expiredPenalty > 0)
             GameManager.Instance.AddPendingPenalty(expiredPenalty);
 
         breakdownPanel.SetActive(false);
         InteractionManager.IsLocked = false;
 
+        CustomerSpawner.Instance.WalkAllOut();
+
         FadeManager.Instance.FadeToBlack(() =>
         {
-            // Everything inside here happens WHILE screen is black
             GameManager.Instance.ApplyPendingMoney();
-            GameManager.Instance.AdvancePhase(); // ← round increments here
-            FadeManager.Instance.FadeFromBlack(); // ← then fades back in showing new round
+            CustomerSpawner.Instance.DespawnAll();
+            GameManager.Instance.AdvancePhase();
+            ResetSpider();
+            FadeManager.Instance.FadeFromBlack();
         });
+    }
+
+    // ── Spider Reset ───────────────────────────────
+
+    void ResetSpider()
+    {
+        SpiderMovement spider = FindObjectOfType<SpiderMovement>();
+        if (spider == null) return;
+
+        spider.gameObject.SetActive(true);
+        spider.enabled = true;
+
+        if (spiderResetPosition != null)
+            spider.transform.position = spiderResetPosition.position;
+
+        CarrySystem carry = FindObjectOfType<CarrySystem>();
+        if (carry != null) carry.ClearAll();
     }
 }

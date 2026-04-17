@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.AI;
 
@@ -27,6 +27,7 @@ public class Customer : MonoBehaviour
 
     public void MoveTo(Vector3 destination, System.Action onArrived = null)
     {
+        StopAllCoroutines(); // ← stop any existing movement first
         StartCoroutine(MoveCoroutine(destination, onArrived));
     }
 
@@ -42,7 +43,6 @@ public class Customer : MonoBehaviour
         }
         else
         {
-            // Fallback � straight line if no agent
             destination.y = transform.position.y;
             while (Vector3.Distance(transform.position, destination) > 0.1f)
             {
