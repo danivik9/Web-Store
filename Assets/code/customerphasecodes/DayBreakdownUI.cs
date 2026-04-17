@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
@@ -22,6 +22,10 @@ public class DayBreakdownUI : MonoBehaviour
     [Header("Button")]
     public Button continueButton;
 
+    private float pendingEarnings = 0f;
+    private float pendingPenalties = 0f;
+    private float expiredPenalty = 0f;
+
     void Awake()
     {
         Instance = this;
@@ -38,20 +42,16 @@ public class DayBreakdownUI : MonoBehaviour
         breakdownPanel.SetActive(true);
         InteractionManager.IsLocked = true;
 
-        // Process waste and get expired count + penalty
+        pendingEarnings = earnings;
+        pendingPenalties = GameManager.Instance.GetPendingPenalties();
+
+        // Process waste
         int expiredCount = StorageInventory.Instance.ProcessWaste(GameManager.Instance.currentRound);
-
-        // Also check store shelves for expired items
         int shelfExpiredCount = ProcessShelfWaste();
-
         int totalExpired = expiredCount + shelfExpiredCount;
-        float expiredPenalty = totalExpired * 1f;
+        expiredPenalty = totalExpired * 1f;
 
-        // Apply expired penalty
-        if (expiredPenalty > 0)
-            GameManager.Instance.SpendMoney(expiredPenalty);
-
-        float net = earnings - expiredPenalty;
+        float net = pendingEarnings - pendingPenalties - expiredPenalty;
 
         // Fill UI
         customersServedText.text = $"Customers Served: {served}";
@@ -93,8 +93,18 @@ public class DayBreakdownUI : MonoBehaviour
 
     void OnContinue()
     {
+        if (expiredPenalty > 0)
+            GameManager.Instance.AddPendingPenalty(expiredPenalty);
+
         breakdownPanel.SetActive(false);
         InteractionManager.IsLocked = false;
-        GameManager.Instance.AdvancePhase();
+
+        FadeManager.Instance.FadeToBlack(() =>
+        {
+            // Everything inside here happens WHILE screen is black
+            GameManager.Instance.ApplyPendingMoney();
+            GameManager.Instance.AdvancePhase(); // ← round increments here
+            FadeManager.Instance.FadeFromBlack(); // ← then fades back in showing new round
+        });
     }
 }

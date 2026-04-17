@@ -15,6 +15,10 @@ public class GameManager : MonoBehaviour
     public float currentMoney = 15f;
     public GamePhase currentPhase;
 
+    [Header("Pending Money")]
+    private float pendingEarnings = 0f;
+    private float pendingPenalties = 0f;
+
     [Header("Events")]
     public UnityEvent onPreparationPhase;
     public UnityEvent onCustomerPhase;
@@ -120,6 +124,7 @@ public class GameManager : MonoBehaviour
         if (currentMoney < 0)
         {
             Debug.Log("Broke! Game Over");
+            EndScreenUI.Instance.ShowEnding(currentMoney);
             onGameOver?.Invoke();
         }
     }
@@ -130,19 +135,43 @@ public class GameManager : MonoBehaviour
         UIManager.Instance.UpdateMoneyDisplay(currentMoney);
     }
 
+    // ── Pending Money ──────────────────────────────
+
+    public void AddPendingEarnings(float amount)
+    {
+        pendingEarnings += amount;
+    }
+
+    public void AddPendingPenalty(float amount)
+    {
+        pendingPenalties += amount;
+    }
+
+    public void ApplyPendingMoney()
+    {
+        float net = pendingEarnings - pendingPenalties;
+        currentMoney += net;
+        UIManager.Instance.UpdateMoneyDisplay(currentMoney);
+
+        pendingEarnings = 0f;
+        pendingPenalties = 0f;
+
+        if (currentMoney < 0)
+        {
+            Debug.Log("Broke! Game Over");
+            EndScreenUI.Instance.ShowEnding(currentMoney); // ← added
+            onGameOver?.Invoke();
+        }
+    }
+
+    public float GetPendingEarnings() => pendingEarnings;
+    public float GetPendingPenalties() => pendingPenalties;
+
     // ── Game End ───────────────────────────────────
 
     void EndGame()
     {
-        if (currentMoney >= 0)
-        {
-            Debug.Log($"Game Won! Final money: ${currentMoney}");
-            onGameWin?.Invoke();
-        }
-        else
-        {
-            Debug.Log("Game Over!");
-            onGameOver?.Invoke();
-        }
+        Debug.Log($"Game ended! Final money: ${currentMoney}");
+        EndScreenUI.Instance.ShowEnding(currentMoney);
     }
 }

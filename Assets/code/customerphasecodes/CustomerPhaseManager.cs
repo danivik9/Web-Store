@@ -62,7 +62,7 @@ public class CustomerPhaseManager : MonoBehaviour
     {
         storeOpen = true;
         Debug.Log("Store is open!");
-        CustomerSpawner.Instance.SpawnCustomers(customerQueue); // ← added
+        CustomerSpawner.Instance.SpawnCustomers(customerQueue);
         CustomerUI.Instance.ShowQueue(customerQueue);
     }
 
@@ -103,7 +103,7 @@ public class CustomerPhaseManager : MonoBehaviour
     {
         activeCustomer = card;
         itemsPlacedForCurrentCustomer.Clear();
-        CustomerSpawner.Instance.MoveCustomerToRegister(card); // ← added
+        CustomerSpawner.Instance.MoveCustomerToRegister(card);
         CustomerUI.Instance.OpenCustomerOrder(card);
     }
 
@@ -147,9 +147,9 @@ public class CustomerPhaseManager : MonoBehaviour
         roundEarnings += earned;
 
         dayLog.Add($"[SERVED] {activeCustomer.customerName} — earned ${earned:F2}");
-        GameManager.Instance.EarnMoney(earned);
+        GameManager.Instance.AddPendingEarnings(earned); // ← changed
 
-        CustomerSpawner.Instance.DespawnCustomer(activeCustomer); // ← added
+        CustomerSpawner.Instance.DespawnCustomer(activeCustomer);
 
         itemsPlacedForCurrentCustomer.Clear();
         activeCustomer = null;
@@ -166,10 +166,10 @@ public class CustomerPhaseManager : MonoBehaviour
         customerQueue.Remove(activeCustomer);
         customersFailed++;
 
-        GameManager.Instance.SpendMoney(activeCustomer.penalty);
+        GameManager.Instance.AddPendingPenalty(activeCustomer.penalty); // ← changed
         dayLog.Add($"[FAILED] {activeCustomer.customerName} — penalty -${activeCustomer.penalty:F2}");
 
-        CustomerSpawner.Instance.DespawnCustomer(activeCustomer); // ← added
+        CustomerSpawner.Instance.DespawnCustomer(activeCustomer);
 
         itemsPlacedForCurrentCustomer.Clear();
         activeCustomer = null;
@@ -186,7 +186,7 @@ public class CustomerPhaseManager : MonoBehaviour
     void EndCustomerPhase()
     {
         storeOpen = false;
-        CustomerSpawner.Instance.DespawnAll(); // ← added
+        CustomerSpawner.Instance.DespawnAll();
         Debug.Log("Customer phase complete!");
         CustomerUI.Instance.CloseQueue();
         DayBreakdownUI.Instance.ShowBreakdown(
