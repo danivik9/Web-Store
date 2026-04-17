@@ -18,7 +18,6 @@ public class CustomerPhaseManager : MonoBehaviour
     private float roundEarnings = 0f;
     private int customersServed = 0;
     private int customersFailed = 0;
-
     private List<string> dayLog = new List<string>();
 
     void Awake()
@@ -39,6 +38,7 @@ public class CustomerPhaseManager : MonoBehaviour
         activeCustomer = null;
         storeOpen = false;
 
+        // Fisher-Yates shuffle
         List<CustomerCard> shuffled = new List<CustomerCard>(allCards);
         for (int i = shuffled.Count - 1; i > 0; i--)
         {
@@ -61,7 +61,6 @@ public class CustomerPhaseManager : MonoBehaviour
     public void OpenStore()
     {
         storeOpen = true;
-        Debug.Log("Store is open!");
         CustomerSpawner.Instance.SpawnCustomers(customerQueue);
         CustomerUI.Instance.ShowQueue(customerQueue);
     }
@@ -92,7 +91,6 @@ public class CustomerPhaseManager : MonoBehaviour
         dayLog.Add($"Restocked — lost {removedName}");
 
         hasRestockedThisRound = true;
-        Debug.Log("Restock triggered!");
         CustomerUI.Instance.ShowQueue(customerQueue);
         return true;
     }
@@ -134,7 +132,7 @@ public class CustomerPhaseManager : MonoBehaviour
     {
         int roll = Random.Range(1, 7) + Random.Range(1, 7);
         BugType result = activeCustomer.GetBugForRoll(roll);
-        Debug.Log($"Rolled {roll} -> {(result != null ? result.bugName : "nothing")}");
+        Debug.Log($"Rolled {roll} → {(result != null ? result.bugName : "nothing")}");
         return result;
     }
 
@@ -147,10 +145,9 @@ public class CustomerPhaseManager : MonoBehaviour
         roundEarnings += earned;
 
         dayLog.Add($"[SERVED] {activeCustomer.customerName} — earned ${earned:F2}");
-        GameManager.Instance.AddPendingEarnings(earned); // ← changed
+        GameManager.Instance.AddPendingEarnings(earned);
 
         CustomerSpawner.Instance.DespawnCustomer(activeCustomer);
-
         itemsPlacedForCurrentCustomer.Clear();
         activeCustomer = null;
 
@@ -166,11 +163,10 @@ public class CustomerPhaseManager : MonoBehaviour
         customerQueue.Remove(activeCustomer);
         customersFailed++;
 
-        GameManager.Instance.AddPendingPenalty(activeCustomer.penalty); // ← changed
         dayLog.Add($"[FAILED] {activeCustomer.customerName} — penalty -${activeCustomer.penalty:F2}");
+        GameManager.Instance.AddPendingPenalty(activeCustomer.penalty);
 
         CustomerSpawner.Instance.DespawnCustomer(activeCustomer);
-
         itemsPlacedForCurrentCustomer.Clear();
         activeCustomer = null;
 
@@ -186,10 +182,11 @@ public class CustomerPhaseManager : MonoBehaviour
     void EndCustomerPhase()
     {
         storeOpen = false;
-        CustomerSpawner.Instance.DespawnAll();
-        Debug.Log("Customer phase complete!");
+        // Do NOT DespawnAll here — customers still need to be visible during the
+        // Day Breakdown screen. DayBreakdownUI.OnContinue handles WalkAllOut
+        // (customers walk to door during fade) then DespawnAll (force-clears).
         CustomerUI.Instance.CloseQueue();
-        GameManager.Instance.StartPhase(GamePhase.Breakdown); // ← add this
+        GameManager.Instance.StartPhase(GamePhase.Breakdown);
         DayBreakdownUI.Instance.ShowBreakdown(
             customersServed,
             customersFailed,

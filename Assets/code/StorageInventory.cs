@@ -1,12 +1,10 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
 
 public class StorageInventory : MonoBehaviour
 {
     public static StorageInventory Instance;
-
     public const int MAX_STORAGE = 25;
-
     private List<BugToken> storedItems = new List<BugToken>();
 
     void Awake()
@@ -14,7 +12,6 @@ public class StorageInventory : MonoBehaviour
         Instance = this;
     }
 
-    // Add item to storage
     public bool AddItem(BugToken token)
     {
         if (storedItems.Count >= MAX_STORAGE)
@@ -27,13 +24,11 @@ public class StorageInventory : MonoBehaviour
         return true;
     }
 
-    // Remove a specific token when carrying to store
     public bool RemoveItem(BugToken token)
     {
         return storedItems.Remove(token);
     }
 
-    // Sort by expiry � shortest first, never expires last
     public void SortItems()
     {
         storedItems.Sort((a, b) =>
@@ -44,7 +39,6 @@ public class StorageInventory : MonoBehaviour
         });
     }
 
-    // Remove expired items at end of round, return penalty count
     public int ProcessWaste(int currentRound)
     {
         int penalty = 0;
@@ -52,7 +46,7 @@ public class StorageInventory : MonoBehaviour
 
         foreach (BugToken token in storedItems)
         {
-            if (token.expiryRound != 99 && token.expiryRound <= currentRound)
+            if (token.expiryRound != 99 && token.expiryRound <= currentRound) // ← <=
                 expired.Add(token);
         }
 
@@ -66,11 +60,9 @@ public class StorageInventory : MonoBehaviour
         return penalty;
     }
 
-    // Get summary text for sticky note
     public string GetStickyNoteText()
     {
         Dictionary<string, int> counts = new Dictionary<string, int>();
-
         foreach (BugToken token in storedItems)
         {
             if (!counts.ContainsKey(token.bugType.bugName))
@@ -83,7 +75,6 @@ public class StorageInventory : MonoBehaviour
         string result = "IN STORAGE\n";
         foreach (var kvp in counts)
             result += $"{kvp.Value}x {kvp.Key}\n";
-
         return result;
     }
 

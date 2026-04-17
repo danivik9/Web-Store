@@ -5,53 +5,41 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
 
-    [Header("Test")]
-    public BugType testBugType;
-    public Shelf testShelf;
-
     [Header("Game State")]
     public int currentRound = 1;
     public int maxRounds = 6;
     public float currentMoney = 15f;
     public GamePhase currentPhase;
 
-    [Header("Pending Money")]
-    private float pendingEarnings = 0f;
-    private float pendingPenalties = 0f;
-
     [Header("Events")]
     public UnityEvent onPreparationPhase;
     public UnityEvent onCustomerPhase;
     public UnityEvent onBreakdownPhase;
-    public UnityEvent onGameOver;
-    public UnityEvent onGameWin;
+
+    private float pendingEarnings = 0f;
+    private float pendingPenalties = 0f;
+    private bool gameEnded = false;
 
     void Awake()
     {
-        if (Instance == null)
-            Instance = this;
-        else
-            Destroy(gameObject);
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
     }
 
     void Start()
     {
         UIManager.Instance.UpdateMoneyDisplay(currentMoney);
         UIManager.Instance.UpdateRoundDisplay(currentRound, maxRounds);
-
         CobwebManager.Instance.ShuffleDeck();
         CobwebManager.Instance.DrawNextCard();
-
         StartPhase(GamePhase.Preparation);
-
-        BugToken testToken = new BugToken(testBugType, currentRound);
-        testShelf.AddBug(testToken);
     }
 
     // ── Phase Control ──────────────────────────────
 
     public void StartPhase(GamePhase phase)
     {
+        if (gameEnded) return;
         currentPhase = phase;
 
         switch (phase)
@@ -64,6 +52,7 @@ public class GameManager : MonoBehaviour
 
     public void AdvancePhase()
     {
+        if (gameEnded) return;
         switch (currentPhase)
         {
             case GamePhase.Preparation: StartPhase(GamePhase.Customer); break;
@@ -76,24 +65,22 @@ public class GameManager : MonoBehaviour
 
     void StartPreparation()
     {
-        Debug.Log($"Round {currentRound} - Preparation Phase");
-
+        Debug.Log($"Round {currentRound} — Preparation Phase");
         if (currentRound > 1)
             CobwebManager.Instance.DrawNextCard();
-
         onPreparationPhase?.Invoke();
     }
 
     void StartCustomer()
     {
-        Debug.Log($"Round {currentRound} - Customer Phase");
+        Debug.Log($"Round {currentRound} — Customer Phase");
         CustomerPhaseManager.Instance.StartCustomerPhase();
         onCustomerPhase?.Invoke();
     }
 
     void StartBreakdown()
     {
-        Debug.Log($"Round {currentRound} - Breakdown Phase");
+        Debug.Log($"Round {currentRound} — Breakdown Phase");
         onBreakdownPhase?.Invoke();
     }
 
@@ -101,8 +88,6 @@ public class GameManager : MonoBehaviour
 
     void EndRound()
     {
-        Debug.Log($"Round {currentRound} complete");
-
         if (currentRound >= maxRounds)
         {
             EndGame();
@@ -120,13 +105,7 @@ public class GameManager : MonoBehaviour
     {
         currentMoney -= amount;
         UIManager.Instance.UpdateMoneyDisplay(currentMoney);
-
-        if (currentMoney < 0)
-        {
-            Debug.Log("Broke! Game Over");
-            EndScreenUI.Instance.ShowEnding(currentMoney);
-            onGameOver?.Invoke();
-        }
+        if (currentMoney < 0f) EndGame();
     }
 
     public void EarnMoney(float amount)
@@ -137,41 +116,35 @@ public class GameManager : MonoBehaviour
 
     // ── Pending Money ──────────────────────────────
 
-    public void AddPendingEarnings(float amount)
-    {
-        pendingEarnings += amount;
-    }
-
-    public void AddPendingPenalty(float amount)
-    {
-        pendingPenalties += amount;
-    }
-
-    public void ApplyPendingMoney()
-    {
-        float net = pendingEarnings - pendingPenalties;
-        currentMoney += net;
-        UIManager.Instance.UpdateMoneyDisplay(currentMoney);
-
-        pendingEarnings = 0f;
-        pendingPenalties = 0f;
-
-        if (currentMoney < 0)
-        {
-            Debug.Log("Broke! Game Over");
-            EndScreenUI.Instance.ShowEnding(currentMoney); // ← added
-            onGameOver?.Invoke();
-        }
-    }
-
+    public void AddPendingEarnings(float amount) => pendingEarnings += amount;
+    public void AddPendingPenalty(float amount) => pendingPenalties += amount;
     public float GetPendingEarnings() => pendingEarnings;
     public float GetPendingPenalties() => pendingPenalties;
 
+    public void ApplyPendingMoney()
+    {
+        currentMoney += pendingEarnings - pendingPenalties;
+        UIManager.Instance.UpdateMoneyDisplay(currentMoney);
+        pendingEarnings = 0f;
+        pendingPenalties = 0f;
+        if (currentMoney < 0f) EndGame();
+    }
+
     // ── Game End ───────────────────────────────────
+
+    public bool IsGameEnded() => gameEnded;
 
     void EndGame()
     {
-        Debug.Log($"Game ended! Final money: ${currentMoney}");
+        if (gameEnded) return;
+        gameEnded = true;
+
+        Debug.Log($"Game over! Final money: ${currentMoney:F2}");
+
+        // Show end screen while screen is still black, then fade in to reveal it.
+        // FadeFromBlack snaps to alpha=1 before lerping, so this also works
+        // correctly if called mid-game outside a fade (e.g. bankruptcy).
         EndScreenUI.Instance.ShowEnding(currentMoney);
+        FadeManager.Instance.FadeFromBlack();
     }
 }

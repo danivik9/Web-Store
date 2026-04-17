@@ -27,12 +27,13 @@ public class DayBreakdownUI : MonoBehaviour
     public Transform spiderResetPosition;
 
     [Header("Typewriter Settings")]
-    public float typewriterSpeed = 0.03f; // ← lower = faster
+    public float typewriterSpeed = 0.03f;
 
     private float expiredPenalty = 0f;
     private float totalEarnings = 0f;
     private float totalPenalties = 0f;
     private bool isTyping = false;
+    private int lastTotalExpired = 0;
 
     void Awake()
     {
@@ -50,20 +51,14 @@ public class DayBreakdownUI : MonoBehaviour
         breakdownPanel.SetActive(true);
         InteractionManager.IsLocked = true;
 
-        int expiredCount = StorageInventory.Instance.ProcessWaste(GameManager.Instance.currentRound);
-        int shelfExpiredCount = ProcessShelfWaste();
-        int totalExpired = expiredCount + shelfExpiredCount;
-        expiredPenalty = totalExpired * 1f;
-
-        totalPenalties = GameManager.Instance.GetPendingPenalties() + expiredPenalty;
+        totalPenalties = GameManager.Instance.GetPendingPenalties();
         totalEarnings = earnings;
+        expiredPenalty = 0f;
 
         float net = totalEarnings - totalPenalties;
 
-        // Disable continue button until typing is done
         continueButton.interactable = false;
 
-        // Clear all text first
         customersServedText.text = "";
         customersFailedText.text = "";
         roundEarningsText.text = "";
@@ -72,22 +67,18 @@ public class DayBreakdownUI : MonoBehaviour
         netResultText.text = "";
         dayLogText.text = "";
 
-        // Build log string
         string logText = "--- LOG ---\n";
         foreach (string entry in log)
             logText += entry + "\n";
 
-        // Start typewriter sequence
         StartCoroutine(TypewriterSequence(
             served, failed, earnings,
-            totalExpired, expiredPenalty,
             net, logText
         ));
     }
 
     IEnumerator TypewriterSequence(
         int served, int failed, float earnings,
-        int totalExpired, float expPenalty,
         float net, string logText)
     {
         isTyping = true;
@@ -101,19 +92,16 @@ public class DayBreakdownUI : MonoBehaviour
         yield return StartCoroutine(TypeText(roundEarningsText, $"Sales Earnings: ${earnings:F2}"));
         yield return new WaitForSeconds(0.1f);
 
-        yield return StartCoroutine(TypeText(expiredItemsText, $"Expired Items: {totalExpired}"));
+        yield return StartCoroutine(TypeText(expiredItemsText, "Expired items calculated at end of day..."));
         yield return new WaitForSeconds(0.1f);
 
-        yield return StartCoroutine(TypeText(expiredPenaltyText, $"Expiry Penalty: -${expPenalty:F2}"));
-        yield return new WaitForSeconds(0.1f);
-
-        yield return StartCoroutine(TypeText(netResultText, $"Net This Round: ${net:F2}"));
+        yield return StartCoroutine(TypeText(netResultText, $"Customer Earnings: ${net:F2}"));
         yield return new WaitForSeconds(0.2f);
 
         yield return StartCoroutine(TypeText(dayLogText, logText));
 
         isTyping = false;
-        continueButton.interactable = true; // ← enable continue only when done
+        continueButton.interactable = true;
     }
 
     IEnumerator TypeText(TextMeshProUGUI textField, string fullText)
@@ -151,10 +139,7 @@ public class DayBreakdownUI : MonoBehaviour
 
     void OnContinue()
     {
-        if (isTyping) return; // safety check
-
-        if (expiredPenalty > 0)
-            GameManager.Instance.AddPendingPenalty(expiredPenalty);
+        if (isTyping) return;
 
         breakdownPanel.SetActive(false);
         InteractionManager.IsLocked = false;
@@ -166,8 +151,30 @@ public class DayBreakdownUI : MonoBehaviour
             GameManager.Instance.ApplyPendingMoney();
             CustomerSpawner.Instance.DespawnAll();
             GameManager.Instance.AdvancePhase();
-            ResetSpider();
-            FadeManager.Instance.FadeFromBlack();
+
+            // Only do normal flow if game hasn't ended
+            if (!GameManager.Instance.IsGameEnded())
+            {
+                int shelfExpired = ProcessShelfWaste();
+                int storageExpired = StorageInventory.Instance.ProcessWaste(GameManager.Instance.currentRound);
+                lastTotalExpired = shelfExpired + storageExpired;
+                expiredPenalty = lastTotalExpired * 1f;
+
+                if (expiredPenalty > 0)
+                    GameManager.Instance.SpendMoney(expiredPenalty);
+
+                ResetSpider();
+
+                FadeManager.Instance.FadeFromBlack(() =>
+                {
+                    if (GameManager.Instance.currentPhase == GamePhase.Preparation)
+                        MorningReportUI.Instance.ShowMorningReport(
+                            lastTotalExpired,
+                            expiredPenalty
+                        );
+                });
+            }
+            // If game ended GameManager handles fade and end screen
         });
     }
 
