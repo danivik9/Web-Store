@@ -55,7 +55,7 @@ public class CobwebUI : MonoBehaviour
     public void OpenShop(CobwebCard card, CobwebManager manager)
     {
         InteractionManager.IsLocked = true;
-        UIManager.Instance.HidePrompt(); // ← added
+        UIManager.Instance.HidePrompt();
         currentCard = card;
         cobwebManager = manager;
 
@@ -103,6 +103,8 @@ public class CobwebUI : MonoBehaviour
 
         cobwebPanel.SetActive(false);
         FindObjectOfType<SpiderMovement>().enabled = true;
+
+        TutorialManager.Instance?.OnCobwebBought();
     }
 
     // ── Updates ────────────────────────────────────

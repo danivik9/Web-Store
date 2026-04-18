@@ -17,5 +17,6 @@ public class Register : MonoBehaviour, IInteractable
         if (CustomerPhaseManager.Instance.HasActiveCustomer()) return;
         CustomerUI.Instance.PanToRegister();
         CustomerUI.Instance.ShowQueue(CustomerPhaseManager.Instance.GetQueue());
+        TutorialManager.Instance?.OnRegisterOpened();
     }
 }

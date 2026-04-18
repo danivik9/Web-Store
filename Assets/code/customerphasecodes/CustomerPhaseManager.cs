@@ -146,6 +146,7 @@ public class CustomerPhaseManager : MonoBehaviour
 
         dayLog.Add($"[SERVED] {activeCustomer.customerName} — earned ${earned:F2}");
         GameManager.Instance.AddPendingEarnings(earned);
+        TutorialManager.Instance?.OnCustomerServed();
 
         CustomerSpawner.Instance.DespawnCustomer(activeCustomer);
         itemsPlacedForCurrentCustomer.Clear();

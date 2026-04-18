@@ -4,19 +4,16 @@ public class Shelf : MonoBehaviour, IInteractable
 {
     [Header("Shelf Settings")]
     public string shelfName;
-    public BugType acceptedBugType;            // ← new: assign in Inspector
+    public BugType acceptedBugType;            // ← assign in Inspector
     public ShelfSlot[] slots = new ShelfSlot[5];
 
     public string GetPromptText()
     {
         if (acceptedBugType == null) return $"Press E to access {shelfName}";
-
         CarrySystem carry = FindObjectOfType<CarrySystem>();
         if (carry == null) return $"Press E to access {shelfName}";
-
         int carried = carry.GetCountOfType(acceptedBugType);
         int empty = GetEmptySlotCount();
-
         if (empty == 0) return $"{shelfName} is full";
         if (carried == 0) return $"Not carrying any {acceptedBugType.bugName}s";
         return $"Press E to place {acceptedBugType.bugName}s ({carried} carried, {empty} slots free)";
@@ -28,7 +25,6 @@ public class Shelf : MonoBehaviour, IInteractable
         if (carry == null) return;
 
         int carried = carry.GetCountOfType(acceptedBugType);
-
         if (carried == 0)
         {
             UIManager.Instance.ShowPrompt($"Not carrying any {acceptedBugType.bugName}s!");
@@ -50,7 +46,10 @@ public class Shelf : MonoBehaviour, IInteractable
         if (placed == 0)
             UIManager.Instance.ShowPrompt($"{shelfName} is full!");
         else
+        {
             UIManager.Instance.ShowPrompt($"Placed {placed} {acceptedBugType.bugName}(s) on {shelfName}!");
+            TutorialManager.Instance?.OnBugsPlaced();
+        }
     }
 
     // ── Existing methods unchanged ──────────────────

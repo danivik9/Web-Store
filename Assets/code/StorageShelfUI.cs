@@ -58,7 +58,7 @@ public class StorageShelfUI : MonoBehaviour
     public void OpenShelf()
     {
         InteractionManager.IsLocked = true;
-        UIManager.Instance.HidePrompt(); // ← added
+        UIManager.Instance.HidePrompt();
         selectedTokens.Clear();
         storagePanel.SetActive(true);
 
@@ -183,5 +183,6 @@ public class StorageShelfUI : MonoBehaviour
         }
 
         CloseShelf();
+        TutorialManager.Instance?.OnBugsCarried();
     }
 }
