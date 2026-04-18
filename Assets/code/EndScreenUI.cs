@@ -75,6 +75,6 @@ public class EndScreenUI : MonoBehaviour
     void OnRestart()
     {
         InteractionManager.IsLocked = false;
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        SceneManager.LoadScene("MainMenu");
     }
 }
