@@ -125,6 +125,7 @@ public class CustomerUI : MonoBehaviour
                 guaranteedText.text = $"{card.guaranteedAmount}x {card.guaranteedBugType.bugName}";
 
             var icon = slot.transform.Find("BugIcon")?.GetComponent<Image>();
+            Debug.Log($"BugIcon found: {icon != null}"); // ← add this line
             if (icon != null) icon.sprite = card.guaranteedBugType.icon;
 
             var btn = slot.GetComponent<Button>();
