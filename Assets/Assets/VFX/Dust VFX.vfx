@@ -74,7 +74,7 @@ MonoBehaviour:
     x: 244
     y: -260
     width: 910
-    height: 1926
+    height: 1927
 --- !u!114 &114350483966674976
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2410,7 +2410,7 @@ MonoBehaviour:
       m_Type:
         m_SerializableType: UnityEditor.VFX.OrientedBox, Unity.VisualEffectGraph.Editor,
           Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-      m_SerializableObject: '{"center":{"x":-3.1995067596435549,"y":0.2626218795776367,"z":-1.9405255317687989},"angles":{"x":0.0,"y":0.0,"z":0.0},"size":{"x":23.969013214111329,"y":7.189355850219727,"z":6.478022575378418}}'
+      m_SerializableObject: '{"center":{"x":-3.8951711654663088,"y":0.19681572914123536,"z":-0.20559120178222657},"angles":{"x":0.0,"y":0.0,"z":0.0},"size":{"x":25.360342025756837,"y":6.4560866355896,"z":9.23342514038086}}'
     m_Space: 0
   m_Property:
     name: Box
