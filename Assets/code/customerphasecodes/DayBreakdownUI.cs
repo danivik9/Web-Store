@@ -71,33 +71,23 @@ public class DayBreakdownUI : MonoBehaviour
         foreach (string entry in log)
             logText += entry + "\n";
 
-        StartCoroutine(TypewriterSequence(
-            served, failed, earnings,
-            net, logText
-        ));
+        StartCoroutine(TypewriterSequence(served, failed, earnings, net, logText));
     }
 
-    IEnumerator TypewriterSequence(
-        int served, int failed, float earnings,
-        float net, string logText)
+    IEnumerator TypewriterSequence(int served, int failed, float earnings, float net, string logText)
     {
         isTyping = true;
 
         yield return StartCoroutine(TypeText(customersServedText, $"Customers Served: {served}"));
         yield return new WaitForSeconds(0.1f);
-
         yield return StartCoroutine(TypeText(customersFailedText, $"Customers Failed: {failed}"));
         yield return new WaitForSeconds(0.1f);
-
         yield return StartCoroutine(TypeText(roundEarningsText, $"Sales Earnings: ${earnings:F2}"));
         yield return new WaitForSeconds(0.1f);
-
         yield return StartCoroutine(TypeText(expiredItemsText, "Expired items calculated at end of day..."));
         yield return new WaitForSeconds(0.1f);
-
         yield return StartCoroutine(TypeText(netResultText, $"Customer Earnings: ${net:F2}"));
         yield return new WaitForSeconds(0.2f);
-
         yield return StartCoroutine(TypeText(dayLogText, logText));
 
         isTyping = false;
@@ -152,7 +142,6 @@ public class DayBreakdownUI : MonoBehaviour
             CustomerSpawner.Instance.DespawnAll();
             GameManager.Instance.AdvancePhase();
 
-            // Only do normal flow if game hasn't ended
             if (!GameManager.Instance.IsGameEnded())
             {
                 int shelfExpired = ProcessShelfWaste();
@@ -163,7 +152,7 @@ public class DayBreakdownUI : MonoBehaviour
                 if (expiredPenalty > 0)
                     GameManager.Instance.SpendMoney(expiredPenalty);
 
-                ResetSpider();
+                ResetSpiderPublic();
 
                 FadeManager.Instance.FadeFromBlack(() =>
                 {
@@ -174,13 +163,11 @@ public class DayBreakdownUI : MonoBehaviour
                         );
                 });
             }
-            // If game ended GameManager handles fade and end screen
         });
     }
 
-    // ── Spider Reset ───────────────────────────────
-
-    void ResetSpider()
+    // ── Spider Reset (public so GameManager can call it) ───
+    public void ResetSpiderPublic()
     {
         SpiderMovement spider = FindObjectOfType<SpiderMovement>();
         if (spider == null) return;

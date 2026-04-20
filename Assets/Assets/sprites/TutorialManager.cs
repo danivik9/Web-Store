@@ -153,9 +153,6 @@ public class TutorialManager : MonoBehaviour
 
     void BuildSteps()
     {
-        // arrowRotation: -90 = points down, 90 = points up, 180 = points left, 0 = points right
-        // offsetX/Y: pixels offset from target centre that the arrow is placed at
-
         steps = new TutorialStep[]
         {
             // ── Introduction ──────────────────────── 0-5
@@ -325,6 +322,9 @@ public class TutorialManager : MonoBehaviour
         waitingForClick = step.trigger == TutorialTrigger.Click;
         waitingForAction = !waitingForClick;
 
+        // ── Hide skip on action steps ──────────────
+        skipButton.gameObject.SetActive(waitingForClick);
+
         clickToContinueText.gameObject.SetActive(false);
         StopAllCoroutines();
         StartCoroutine(TypeText(step.text));
@@ -342,15 +342,18 @@ public class TutorialManager : MonoBehaviour
 
         if (!waitingForClick) return;
 
+        // Click during typewriter → skip to end of text
         if (Input.GetMouseButtonDown(0) && isTyping)
         {
             StopAllCoroutines();
             tutorialText.text = steps[currentStep].text;
             isTyping = false;
+            InteractionManager.IsLocked = false;
             clickToContinueText.gameObject.SetActive(true);
             return;
         }
 
+        // Click after typing → advance
         if (Input.GetMouseButtonDown(0) && !isTyping)
             AdvanceStep();
     }
@@ -360,6 +363,10 @@ public class TutorialManager : MonoBehaviour
         currentStep++;
         ShowStep(currentStep);
     }
+
+    // ── Public Helpers ─────────────────────────────
+
+    public bool IsDoorStepReached() => currentStep >= 18;
 
     // ── Trigger Hooks ──────────────────────────────
 
@@ -444,6 +451,7 @@ public class TutorialManager : MonoBehaviour
         }
 
         isTyping = false;
+        InteractionManager.IsLocked = false;
         if (waitingForClick)
             clickToContinueText.gameObject.SetActive(true);
     }

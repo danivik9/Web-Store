@@ -29,7 +29,7 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        PlayerPrefs.DeleteKey("TutorialComplete"); // ← remove this before final build
+        PlayerPrefs.DeleteKey("TutorialComplete"); // ← remove before final build
 
         bool tutorialDone = PlayerPrefs.GetInt("TutorialComplete", 0) == 1;
 
@@ -129,6 +129,9 @@ public class GameManager : MonoBehaviour
         StorageInventory.Instance.ClearAll();
         CarrySystem carry = FindObjectOfType<CarrySystem>();
         if (carry != null) carry.ClearAll();
+
+        // ── Reset spider to starting position ──────
+        DayBreakdownUI.Instance.ResetSpiderPublic();
 
         // Re-enable spider
         SpiderMovement spider = FindObjectOfType<SpiderMovement>();

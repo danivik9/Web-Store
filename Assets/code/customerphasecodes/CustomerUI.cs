@@ -121,12 +121,16 @@ public class CustomerUI : MonoBehaviour
         for (int i = queueContainer.childCount - 1; i >= 0; i--)
             Destroy(queueContainer.GetChild(i).gameObject);
 
-        foreach (CustomerCard card in queue)
+        bool isRound0 = GameManager.Instance.isRound0;
+
+        for (int i = 0; i < queue.Count; i++)
         {
+            CustomerCard card = queue[i];
             GameObject slot = Instantiate(customerQueueSlotPrefab, queueContainer);
             CustomerCard captured = card;
+            bool isFirst = i == 0;
 
-            // ── Random sticky note sprite (stable per customer per round) ──
+            // ── Random sticky note sprite ──────────
             if (queueSlotSprites != null && queueSlotSprites.Length > 0)
             {
                 if (!assignedSprites.ContainsKey(card))
@@ -149,7 +153,21 @@ public class CustomerUI : MonoBehaviour
 
             var btn = slot.GetComponent<Button>();
             if (btn != null)
-                btn.onClick.AddListener(() => CustomerPhaseManager.Instance.SelectCustomer(captured));
+            {
+                // ── Round 0: only first customer clickable ──
+                if (isRound0 && !isFirst)
+                {
+                    btn.interactable = false;
+                    var bg = slot.GetComponent<Image>();
+                    if (bg != null)
+                        bg.color = new Color(bg.color.r, bg.color.g, bg.color.b, 0.4f);
+                }
+                else
+                {
+                    btn.onClick.AddListener(() =>
+                        CustomerPhaseManager.Instance.SelectCustomer(captured));
+                }
+            }
         }
 
         bool canRestock = !CustomerPhaseManager.Instance.hasRestockedThisRound
@@ -350,7 +368,7 @@ public class CustomerUI : MonoBehaviour
             Destroy(oldSlot);
 
             GameObject newSlot = Instantiate(itemSlotPrefab, parent);
-            newSlot.transform.SetSiblingIndex(index); // ← fixes slot jumping to wrong position
+            newSlot.transform.SetSiblingIndex(index);
             randomSlotObjects[index] = newSlot;
 
             if (result != null)

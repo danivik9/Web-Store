@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: CustomerCard2
   m_EditorClassIdentifier: 
   customerName: Frog
-  customerPrefab: {fileID: 1879400853352028754, guid: a31b49c45dcf8e34dbdc2d5132a83d00, type: 3}
+  customerPrefab: {fileID: 9055058353782491243, guid: 6bdb922b89bf64540ab83dc6ed330d6d, type: 3}
   guaranteedBugType: {fileID: 11400000, guid: 90e967b140a734e41a26634ab274a5ba, type: 2}
   guaranteedAmount: 2
   randomRollCount: 2
