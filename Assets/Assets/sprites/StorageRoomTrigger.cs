@@ -1,14 +1,14 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class StorageRoomTrigger : MonoBehaviour
 {
-    private bool triggered = false;
+    // ── No 'triggered' guard — fires every entry so tutorial step
+    //    is never missed if the player wanders in early. TryAdvance
+    //    in TutorialManager only reacts when the correct step is active.
 
     void OnTriggerEnter(Collider other)
     {
-        if (triggered) return;
         if (!other.GetComponent<SpiderMovement>()) return;
-        triggered = true;
         TutorialManager.Instance?.OnStorageEntered();
     }
 }

@@ -50,8 +50,6 @@ public class CobwebUI : MonoBehaviour
         Instance = this;
     }
 
-    // ── Open / Close ───────────────────────────────
-
     public void OpenShop(CobwebCard card, CobwebManager manager)
     {
         InteractionManager.IsLocked = true;
@@ -91,6 +89,9 @@ public class CobwebUI : MonoBehaviour
 
         exitButton.onClick.RemoveAllListeners();
         exitButton.onClick.AddListener(() => CloseShop());
+
+        // ── Tutorial hook ──────────────────────────
+        TutorialManager.Instance?.OnCobwebOpened();
     }
 
     public void CloseShop()
@@ -103,11 +104,7 @@ public class CobwebUI : MonoBehaviour
 
         cobwebPanel.SetActive(false);
         FindObjectOfType<SpiderMovement>().enabled = true;
-
-        TutorialManager.Instance?.OnCobwebBought();
     }
-
-    // ── Updates ────────────────────────────────────
 
     void UpdatePriceLabels()
     {
@@ -178,6 +175,9 @@ public class CobwebUI : MonoBehaviour
 
         for (int i = webItemsContainer.childCount - 1; i >= 0; i--)
             Destroy(webItemsContainer.GetChild(i).gameObject);
+
+        // ── Tutorial hook fires on actual purchase ──
+        TutorialManager.Instance?.OnCobwebBought();
 
         Invoke(nameof(CloseShop), 2f);
     }

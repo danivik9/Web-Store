@@ -10,6 +10,7 @@ public class GameManager : MonoBehaviour
     public int maxRounds = 6;
     public float currentMoney = 15f;
     public GamePhase currentPhase;
+    public bool isRound0 = false;
 
     [Header("Events")]
     public UnityEvent onPreparationPhase;
@@ -28,6 +29,17 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
+        PlayerPrefs.DeleteKey("TutorialComplete"); // ← remove this before final build
+
+        bool tutorialDone = PlayerPrefs.GetInt("TutorialComplete", 0) == 1;
+
+        if (!tutorialDone)
+        {
+            isRound0 = true;
+            currentRound = 0;
+            currentMoney = 50f;
+        }
+
         UIManager.Instance.UpdateMoneyDisplay(currentMoney);
         UIManager.Instance.UpdateRoundDisplay(currentRound, maxRounds);
         CobwebManager.Instance.ShuffleDeck();
@@ -81,6 +93,7 @@ public class GameManager : MonoBehaviour
     void StartBreakdown()
     {
         Debug.Log($"Round {currentRound} — Breakdown Phase");
+        if (isRound0) return;
         onBreakdownPhase?.Invoke();
     }
 
@@ -88,6 +101,8 @@ public class GameManager : MonoBehaviour
 
     void EndRound()
     {
+        if (isRound0) return;
+
         if (currentRound >= maxRounds)
         {
             EndGame();
@@ -99,13 +114,48 @@ public class GameManager : MonoBehaviour
         StartPhase(GamePhase.Preparation);
     }
 
+    public void EndRound0()
+    {
+        if (!isRound0) return;
+        isRound0 = false;
+
+        // Clear all shelves
+        Shelf[] shelves = FindObjectsOfType<Shelf>();
+        foreach (Shelf shelf in shelves)
+            foreach (ShelfSlot slot in shelf.slots)
+                slot.ClearSlot();
+
+        // Clear storage and carry
+        StorageInventory.Instance.ClearAll();
+        CarrySystem carry = FindObjectOfType<CarrySystem>();
+        if (carry != null) carry.ClearAll();
+
+        // Re-enable spider
+        SpiderMovement spider = FindObjectOfType<SpiderMovement>();
+        if (spider != null) spider.enabled = true;
+
+        // Reset to real game state
+        currentRound = 1;
+        currentMoney = 15f;
+        pendingEarnings = 0f;
+        pendingPenalties = 0f;
+        gameEnded = false;
+
+        UIManager.Instance.UpdateMoneyDisplay(currentMoney);
+        UIManager.Instance.UpdateRoundDisplay(currentRound, maxRounds);
+
+        CobwebManager.Instance.ShuffleDeck();
+        CobwebManager.Instance.DrawNextCard();
+        StartPhase(GamePhase.Preparation);
+    }
+
     // ── Money ──────────────────────────────────────
 
     public void SpendMoney(float amount)
     {
         currentMoney -= amount;
         UIManager.Instance.UpdateMoneyDisplay(currentMoney);
-        if (currentMoney < 0f) EndGame();
+        if (currentMoney < 0f && !isRound0) EndGame();
     }
 
     public void EarnMoney(float amount)
@@ -127,7 +177,7 @@ public class GameManager : MonoBehaviour
         UIManager.Instance.UpdateMoneyDisplay(currentMoney);
         pendingEarnings = 0f;
         pendingPenalties = 0f;
-        if (currentMoney < 0f) EndGame();
+        if (currentMoney < 0f && !isRound0) EndGame();
     }
 
     // ── Game End ───────────────────────────────────
@@ -141,9 +191,6 @@ public class GameManager : MonoBehaviour
 
         Debug.Log($"Game over! Final money: ${currentMoney:F2}");
 
-        // Show end screen while screen is still black, then fade in to reveal it.
-        // FadeFromBlack snaps to alpha=1 before lerping, so this also works
-        // correctly if called mid-game outside a fade (e.g. bankruptcy).
         EndScreenUI.Instance.ShowEnding(currentMoney);
         FadeManager.Instance.FadeFromBlack();
     }

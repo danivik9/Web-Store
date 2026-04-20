@@ -53,8 +53,6 @@ public class StorageShelfUI : MonoBehaviour
             CloseShelf();
     }
 
-    // ── Open / Close ───────────────────────────────
-
     public void OpenShelf()
     {
         InteractionManager.IsLocked = true;
@@ -73,6 +71,9 @@ public class StorageShelfUI : MonoBehaviour
 
         UpdateGrid();
         UpdateSelectedCount();
+
+        // ── Tutorial hook ──────────────────────────
+        TutorialManager.Instance?.OnStorageOpened();
     }
 
     public void CloseShelf()
@@ -86,8 +87,6 @@ public class StorageShelfUI : MonoBehaviour
         cameraFollow.ReturnToFollow();
         selectedTokens.Clear();
     }
-
-    // ── Grid ───────────────────────────────────────
 
     void UpdateGrid()
     {
@@ -171,8 +170,6 @@ public class StorageShelfUI : MonoBehaviour
         selectedCountText.text = $"Selected: {selectedTokens.Count}/5";
         carryButton.interactable = selectedTokens.Count > 0;
     }
-
-    // ── Carry ──────────────────────────────────────
 
     void OnCarry()
     {

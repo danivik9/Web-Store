@@ -25,9 +25,11 @@ public class CustomerPhaseManager : MonoBehaviour
         Instance = this;
     }
 
+    // ── Phase Start ────────────────────────────────
+
     public void StartCustomerPhase()
     {
-        CustomerUI.Instance.ClearAssignedSprites(); // ← clears sprite memory for new round
+        CustomerUI.Instance.ClearAssignedSprites();
         hasRestockedThisRound = false;
         roundEarnings = 0f;
         customersServed = 0;
@@ -37,6 +39,7 @@ public class CustomerPhaseManager : MonoBehaviour
         activeCustomer = null;
         storeOpen = false;
 
+        // Fisher-Yates shuffle
         List<CustomerCard> shuffled = new List<CustomerCard>(allCards);
         for (int i = shuffled.Count - 1; i > 0; i--)
         {
@@ -51,8 +54,14 @@ public class CustomerPhaseManager : MonoBehaviour
         for (int i = 0; i < count; i++)
             customerQueue.Add(shuffled[i]);
 
+        // ── Round 0: sort so servable customers come first ──
+        if (GameManager.Instance.isRound0)
+            SortQueueForTutorial();
+
         Debug.Log($"Customer phase started — {customerQueue.Count} customers queued");
     }
+
+    // ── Store Door ─────────────────────────────────
 
     public void OpenStore()
     {
@@ -61,11 +70,25 @@ public class CustomerPhaseManager : MonoBehaviour
         CustomerUI.Instance.ShowQueue(customerQueue);
     }
 
+    // ── Restock ────────────────────────────────────
+
     public bool TryRestock()
     {
-        if (hasRestockedThisRound) return false;
-        if (customerQueue.Count == 0) return false;
-        if (StorageInventory.Instance.GetCount() == 0) return false;
+        if (hasRestockedThisRound)
+        {
+            Debug.Log("Already restocked this round!");
+            return false;
+        }
+        if (customerQueue.Count == 0)
+        {
+            Debug.Log("No customers to lose!");
+            return false;
+        }
+        if (StorageInventory.Instance.GetCount() == 0)
+        {
+            Debug.Log("Nothing in storage to restock with!");
+            return false;
+        }
 
         int removeIndex = Random.Range(0, customerQueue.Count);
         CustomerCard removed = customerQueue[removeIndex];
@@ -76,8 +99,13 @@ public class CustomerPhaseManager : MonoBehaviour
         hasRestockedThisRound = true;
         CustomerSpawner.Instance.DespawnCustomer(removed);
         CustomerUI.Instance.ShowQueue(customerQueue);
+
+        // ── Tutorial hook ──────────────────────────
+        TutorialManager.Instance?.OnRestockUsed();
         return true;
     }
+
+    // ── Serving a Customer ─────────────────────────
 
     public void SelectCustomer(CustomerCard card)
     {
@@ -85,6 +113,9 @@ public class CustomerPhaseManager : MonoBehaviour
         itemsPlacedForCurrentCustomer.Clear();
         CustomerSpawner.Instance.MoveCustomerToRegister(card);
         CustomerUI.Instance.OpenCustomerOrder(card);
+
+        // ── Tutorial hook ──────────────────────────
+        TutorialManager.Instance?.OnCustomerCalled();
     }
 
     public bool PlaceItem(BugType bugType)
@@ -149,6 +180,9 @@ public class CustomerPhaseManager : MonoBehaviour
         dayLog.Add($"[FAILED] {activeCustomer.customerName} — penalty -${activeCustomer.penalty:F2}");
         GameManager.Instance.AddPendingPenalty(activeCustomer.penalty);
 
+        // ── Tutorial hook ──────────────────────────
+        TutorialManager.Instance?.OnCantServeUsed();
+
         CustomerSpawner.Instance.DespawnCustomer(activeCustomer);
         itemsPlacedForCurrentCustomer.Clear();
         activeCustomer = null;
@@ -160,10 +194,20 @@ public class CustomerPhaseManager : MonoBehaviour
             EndCustomerPhase();
     }
 
+    // ── End of Phase ───────────────────────────────
+
     void EndCustomerPhase()
     {
         storeOpen = false;
         CustomerUI.Instance.CloseQueue();
+
+        // ── Round 0: skip breakdown entirely ──────
+        if (GameManager.Instance.isRound0)
+            return;
+
+        // Do NOT DespawnAll here — customers still need to be visible during the
+        // Day Breakdown screen. DayBreakdownUI.OnContinue handles WalkAllOut
+        // (customers walk to door during fade) then DespawnAll (force-clears).
         GameManager.Instance.StartPhase(GamePhase.Breakdown);
         DayBreakdownUI.Instance.ShowBreakdown(
             customersServed,
@@ -172,6 +216,95 @@ public class CustomerPhaseManager : MonoBehaviour
             dayLog
         );
     }
+
+    // ── Tutorial Queue Helpers ─────────────────────
+
+    /// <summary>
+    /// Called by TutorialManager when the can't-serve step is shown.
+    /// Moves the most appropriate unservable customer to the front of the queue.
+    /// </summary>
+    public void MoveUnservableCustomerToFront()
+    {
+        if (customerQueue.Count == 0) return;
+
+        CustomerCard target = null;
+
+        // Priority 1: partial stock (has SOME but not ENOUGH)
+        foreach (CustomerCard card in customerQueue)
+        {
+            int shelfCount = GetShelfCount(card.guaranteedBugType);
+            if (shelfCount > 0 && shelfCount < card.guaranteedAmount)
+            {
+                target = card;
+                break;
+            }
+        }
+
+        // Priority 2: completely out of stock for guaranteed bug
+        if (target == null)
+        {
+            foreach (CustomerCard card in customerQueue)
+            {
+                if (GetShelfCount(card.guaranteedBugType) < card.guaranteedAmount)
+                {
+                    target = card;
+                    break;
+                }
+            }
+        }
+
+        // Priority 3: customer with highest guaranteed amount
+        if (target == null)
+        {
+            target = customerQueue[0];
+            foreach (CustomerCard card in customerQueue)
+                if (card.guaranteedAmount > target.guaranteedAmount)
+                    target = card;
+        }
+
+        if (target == null) return;
+
+        customerQueue.Remove(target);
+        customerQueue.Insert(0, target);
+
+        CustomerUI.Instance.ShowQueue(customerQueue);
+        Debug.Log($"Tutorial: moved {target.customerName} to front as unservable customer.");
+    }
+
+    /// <summary>
+    /// Called at start of Round 0 customer phase.
+    /// Puts servable customers first so tutorial can guarantee first 2 serves succeed.
+    /// </summary>
+    void SortQueueForTutorial()
+    {
+        List<CustomerCard> servable = new List<CustomerCard>();
+        List<CustomerCard> unservable = new List<CustomerCard>();
+
+        foreach (CustomerCard card in customerQueue)
+        {
+            if (GetShelfCount(card.guaranteedBugType) >= card.guaranteedAmount)
+                servable.Add(card);
+            else
+                unservable.Add(card);
+        }
+
+        customerQueue.Clear();
+        customerQueue.AddRange(servable);
+        customerQueue.AddRange(unservable);
+
+        Debug.Log($"Tutorial queue sorted: {servable.Count} servable, {unservable.Count} unservable.");
+    }
+
+    int GetShelfCount(BugType bugType)
+    {
+        Shelf[] shelves = FindObjectsOfType<Shelf>();
+        foreach (Shelf shelf in shelves)
+            if (shelf.acceptedBugType == bugType)
+                return shelf.GetOccupiedCount();
+        return 0;
+    }
+
+    // ── Helpers ────────────────────────────────────
 
     float CalculateCustomerEarnings()
     {
