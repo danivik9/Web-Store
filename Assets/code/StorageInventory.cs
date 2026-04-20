@@ -45,8 +45,10 @@ public class StorageInventory : MonoBehaviour
         List<BugToken> expired = new List<BugToken>();
 
         foreach (BugToken token in storedItems)
-            if (token.expiryRound != 99 && token.expiryRound <= currentRound)
+        {
+            if (token.expiryRound != 99 && token.expiryRound <= currentRound) // ← <=
                 expired.Add(token);
+        }
 
         foreach (BugToken token in expired)
         {
@@ -56,13 +58,6 @@ public class StorageInventory : MonoBehaviour
         }
 
         return penalty;
-    }
-
-    // ── Clear All (used when ending Round 0) ──────
-    public void ClearAll()
-    {
-        storedItems.Clear();
-        Debug.Log("Storage cleared.");
     }
 
     public string GetStickyNoteText()

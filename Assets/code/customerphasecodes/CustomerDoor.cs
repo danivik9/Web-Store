@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class CustomerDoor : MonoBehaviour, IInteractable
 {
@@ -12,8 +12,7 @@ public class CustomerDoor : MonoBehaviour, IInteractable
     public void Interact()
     {
         if (GameManager.Instance.currentPhase != GamePhase.Preparation) return;
-        GameManager.Instance.AdvancePhase();
+        GameManager.Instance.AdvancePhase(); // moves to Customer phase
         CustomerPhaseManager.Instance.OpenStore();
-        TutorialManager.Instance?.OnDoorOpened(); // ← tutorial hook
     }
 }
