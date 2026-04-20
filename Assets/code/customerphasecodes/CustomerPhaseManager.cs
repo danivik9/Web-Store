@@ -25,10 +25,9 @@ public class CustomerPhaseManager : MonoBehaviour
         Instance = this;
     }
 
-    // ── Phase Start ────────────────────────────────
-
     public void StartCustomerPhase()
     {
+        CustomerUI.Instance.ClearAssignedSprites(); // ← clears sprite memory for new round
         hasRestockedThisRound = false;
         roundEarnings = 0f;
         customersServed = 0;
@@ -38,7 +37,6 @@ public class CustomerPhaseManager : MonoBehaviour
         activeCustomer = null;
         storeOpen = false;
 
-        // Fisher-Yates shuffle
         List<CustomerCard> shuffled = new List<CustomerCard>(allCards);
         for (int i = shuffled.Count - 1; i > 0; i--)
         {
@@ -56,8 +54,6 @@ public class CustomerPhaseManager : MonoBehaviour
         Debug.Log($"Customer phase started — {customerQueue.Count} customers queued");
     }
 
-    // ── Store Door ─────────────────────────────────
-
     public void OpenStore()
     {
         storeOpen = true;
@@ -65,37 +61,23 @@ public class CustomerPhaseManager : MonoBehaviour
         CustomerUI.Instance.ShowQueue(customerQueue);
     }
 
-    // ── Restock ────────────────────────────────────
-
     public bool TryRestock()
     {
-        if (hasRestockedThisRound)
-        {
-            Debug.Log("Already restocked this round!");
-            return false;
-        }
-        if (customerQueue.Count == 0)
-        {
-            Debug.Log("No customers to lose!");
-            return false;
-        }
-        if (StorageInventory.Instance.GetCount() == 0)
-        {
-            Debug.Log("Nothing in storage to restock with!");
-            return false;
-        }
+        if (hasRestockedThisRound) return false;
+        if (customerQueue.Count == 0) return false;
+        if (StorageInventory.Instance.GetCount() == 0) return false;
 
         int removeIndex = Random.Range(0, customerQueue.Count);
-        string removedName = customerQueue[removeIndex].customerName;
+        CustomerCard removed = customerQueue[removeIndex];
+        string removedName = removed.customerName;
         customerQueue.RemoveAt(removeIndex);
         dayLog.Add($"Restocked — lost {removedName}");
 
         hasRestockedThisRound = true;
+        CustomerSpawner.Instance.DespawnCustomer(removed);
         CustomerUI.Instance.ShowQueue(customerQueue);
         return true;
     }
-
-    // ── Serving a Customer ─────────────────────────
 
     public void SelectCustomer(CustomerCard card)
     {
@@ -178,14 +160,9 @@ public class CustomerPhaseManager : MonoBehaviour
             EndCustomerPhase();
     }
 
-    // ── End of Phase ───────────────────────────────
-
     void EndCustomerPhase()
     {
         storeOpen = false;
-        // Do NOT DespawnAll here — customers still need to be visible during the
-        // Day Breakdown screen. DayBreakdownUI.OnContinue handles WalkAllOut
-        // (customers walk to door during fade) then DespawnAll (force-clears).
         CustomerUI.Instance.CloseQueue();
         GameManager.Instance.StartPhase(GamePhase.Breakdown);
         DayBreakdownUI.Instance.ShowBreakdown(
@@ -195,8 +172,6 @@ public class CustomerPhaseManager : MonoBehaviour
             dayLog
         );
     }
-
-    // ── Helpers ────────────────────────────────────
 
     float CalculateCustomerEarnings()
     {

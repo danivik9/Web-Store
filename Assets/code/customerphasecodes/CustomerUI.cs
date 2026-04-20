@@ -22,6 +22,9 @@ public class CustomerUI : MonoBehaviour
     public Button restockButton;
     public TextMeshProUGUI restockButtonText;
 
+    [Header("Queue Slot Sprites")]
+    public Sprite[] queueSlotSprites;
+
     [Header("Order Panel")]
     public GameObject orderPanel;
     public TextMeshProUGUI customerNameText;
@@ -46,6 +49,7 @@ public class CustomerUI : MonoBehaviour
     private List<GameObject> guaranteedSlotObjects = new List<GameObject>();
     private List<GameObject> randomSlotObjects = new List<GameObject>();
     private List<BugType> revealedRandomBugs = new List<BugType>();
+    private Dictionary<CustomerCard, Sprite> assignedSprites = new Dictionary<CustomerCard, Sprite>();
 
     private int guaranteedFilled = 0;
     private int randomFilled = 0;
@@ -104,6 +108,11 @@ public class CustomerUI : MonoBehaviour
 
     // ── Queue ──────────────────────────────────────
 
+    public void ClearAssignedSprites()
+    {
+        assignedSprites.Clear();
+    }
+
     public void ShowQueue(List<CustomerCard> queue)
     {
         queuePanel.SetActive(true);
@@ -117,6 +126,17 @@ public class CustomerUI : MonoBehaviour
             GameObject slot = Instantiate(customerQueueSlotPrefab, queueContainer);
             CustomerCard captured = card;
 
+            // ── Random sticky note sprite (stable per customer per round) ──
+            if (queueSlotSprites != null && queueSlotSprites.Length > 0)
+            {
+                if (!assignedSprites.ContainsKey(card))
+                    assignedSprites[card] = queueSlotSprites[Random.Range(0, queueSlotSprites.Length)];
+
+                var bg = slot.GetComponent<Image>();
+                if (bg != null)
+                    bg.sprite = assignedSprites[card];
+            }
+
             var nameText = slot.transform.Find("CustomerName")?.GetComponent<TextMeshProUGUI>();
             if (nameText != null) nameText.text = card.customerName;
 
@@ -125,7 +145,6 @@ public class CustomerUI : MonoBehaviour
                 guaranteedText.text = $"{card.guaranteedAmount}x {card.guaranteedBugType.bugName}";
 
             var icon = slot.transform.Find("BugIcon")?.GetComponent<Image>();
-            Debug.Log($"BugIcon found: {icon != null}"); // ← add this line
             if (icon != null) icon.sprite = card.guaranteedBugType.icon;
 
             var btn = slot.GetComponent<Button>();
@@ -192,7 +211,7 @@ public class CustomerUI : MonoBehaviour
             if (icon != null)
             {
                 icon.sprite = card.guaranteedBugType.icon;
-                icon.color = new Color(1f, 1f, 1f, 0.35f); // ← semi-transparent until filled
+                icon.color = new Color(1f, 1f, 1f, 0.35f);
             }
 
             var label = slot.transform.Find("BugName")?.GetComponent<TextMeshProUGUI>();
@@ -240,7 +259,7 @@ public class CustomerUI : MonoBehaviour
             if (bg != null) bg.color = new Color(0.6f, 1f, 0.6f);
 
             var icon = slot.transform.Find("BugIcon")?.GetComponent<Image>();
-            if (icon != null) icon.color = new Color(1f, 1f, 1f, 1f); // ← fully opaque
+            if (icon != null) icon.color = new Color(1f, 1f, 1f, 1f);
 
             var btn = slot.GetComponent<Button>();
             if (btn != null) btn.interactable = false;
@@ -278,7 +297,7 @@ public class CustomerUI : MonoBehaviour
             if (bg != null) bg.color = new Color(0.6f, 1f, 0.6f);
 
             var icon = slot.transform.Find("BugIcon")?.GetComponent<Image>();
-            if (icon != null) icon.color = new Color(1f, 1f, 1f, 1f); // ← fully opaque
+            if (icon != null) icon.color = new Color(1f, 1f, 1f, 1f);
 
             var btn = slot.GetComponent<Button>();
             if (btn != null) btn.interactable = false;
@@ -331,6 +350,7 @@ public class CustomerUI : MonoBehaviour
             Destroy(oldSlot);
 
             GameObject newSlot = Instantiate(itemSlotPrefab, parent);
+            newSlot.transform.SetSiblingIndex(index); // ← fixes slot jumping to wrong position
             randomSlotObjects[index] = newSlot;
 
             if (result != null)
@@ -339,7 +359,7 @@ public class CustomerUI : MonoBehaviour
                 if (icon != null)
                 {
                     icon.sprite = result.icon;
-                    icon.color = new Color(1f, 1f, 1f, 0.35f); // ← semi-transparent until clicked
+                    icon.color = new Color(1f, 1f, 1f, 0.35f);
                 }
 
                 var label = newSlot.transform.Find("BugName")?.GetComponent<TextMeshProUGUI>();
