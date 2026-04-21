@@ -78,8 +78,14 @@ public class GameManager : MonoBehaviour
     void StartPreparation()
     {
         Debug.Log($"Round {currentRound} — Preparation Phase");
+
+        // ── Stock shelves at start of Round 1 only ──
+        if (currentRound == 1 && !isRound0)
+            StockStartingShelves();
+
         if (currentRound > 1)
             CobwebManager.Instance.DrawNextCard();
+
         onPreparationPhase?.Invoke();
     }
 
@@ -95,6 +101,35 @@ public class GameManager : MonoBehaviour
         Debug.Log($"Round {currentRound} — Breakdown Phase");
         if (isRound0) return;
         onBreakdownPhase?.Invoke();
+    }
+
+    // ── Starting Shelves ───────────────────────────
+
+    void StockStartingShelves()
+    {
+        BugType[] bugs = CobwebManager.Instance.GetAllBugTypes();
+        // 0=FruitFly  1=Ant  2=Mosquito  3=Maggot  4=Moth
+        // Each shelf gets 4 of its bug type — shelves have 5 slots max
+        // so this leaves 1 slot free for the player to add to
+
+        int[] amounts = { 4, 4, 4, 4, 4 };
+
+        Shelf[] shelves = FindObjectsOfType<Shelf>();
+        foreach (Shelf shelf in shelves)
+        {
+            if (shelf.acceptedBugType == null) continue;
+            for (int i = 0; i < bugs.Length; i++)
+            {
+                if (shelf.acceptedBugType == bugs[i])
+                {
+                    for (int j = 0; j < amounts[i]; j++)
+                        shelf.AddBug(new BugToken(bugs[i], 1));
+                    break;
+                }
+            }
+        }
+
+        Debug.Log("Round 1 shelves stocked with 4 of each bug type.");
     }
 
     // ── Round Control ──────────────────────────────
