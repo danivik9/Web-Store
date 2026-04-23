@@ -24,6 +24,8 @@ public class CobwebManager : MonoBehaviour, IInteractable
         Instance = this;
     }
 
+    // ── Deck ───────────────────────────────────────
+
     public void ShuffleDeck()
     {
         List<CobwebCard> temp = new List<CobwebCard>(allCards);
@@ -54,6 +56,8 @@ public class CobwebManager : MonoBehaviour, IInteractable
         Debug.Log("New cobweb card drawn!");
     }
 
+    // ── Interactable ───────────────────────────────
+
     public string GetPromptText()
     {
         if (GameManager.Instance.currentPhase != GamePhase.Preparation)
@@ -68,6 +72,8 @@ public class CobwebManager : MonoBehaviour, IInteractable
         CobwebUI.Instance.OpenShop(currentCard, this);
     }
 
+    // ── Order Management ───────────────────────────
+
     public bool AddToPendingOrder(BugType bugType)
     {
         int currentStorage = StorageInventory.Instance.GetCount();
@@ -79,6 +85,7 @@ public class CobwebManager : MonoBehaviour, IInteractable
             return false;
         }
 
+        // Check if player can afford total order so far
         float totalCost = GetTotalCost() + currentCard.GetPrice(bugType);
         if (totalCost > GameManager.Instance.currentMoney)
         {
@@ -90,9 +97,6 @@ public class CobwebManager : MonoBehaviour, IInteractable
         CobwebUI.Instance.UpdateWebDisplay(pendingOrder);
         CobwebUI.Instance.UpdateStickyNote();
         CobwebUI.Instance.UpdateTotalCost(GetTotalCost());
-
-        // ── Tutorial hook ──────────────────────────
-        TutorialManager.Instance?.OnBugAddedToCart();
         return true;
     }
 
@@ -106,6 +110,7 @@ public class CobwebManager : MonoBehaviour, IInteractable
         CobwebUI.Instance.UpdateTotalCost(GetTotalCost());
     }
 
+    // Only deducts money when player confirms
     public void CollectOrder()
     {
         float totalCost = GetTotalCost();
@@ -139,5 +144,6 @@ public class CobwebManager : MonoBehaviour, IInteractable
 
     public List<BugType> GetPendingOrder() => pendingOrder;
     public CobwebCard GetCurrentCard() => currentCard;
-    public BugType[] GetAllBugTypes() => new BugType[] { fruitFly, ant, mosquito, maggot, moth };
+    public BugType[] GetAllBugTypes() => new BugType[]
+        { fruitFly, ant, mosquito, maggot, moth };
 }

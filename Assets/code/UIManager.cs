@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using TMPro;
 
 public class UIManager : MonoBehaviour
@@ -28,7 +28,9 @@ public class UIManager : MonoBehaviour
     void Update()
     {
         if (tooltipPanel.activeSelf)
+        {
             tooltipPanel.transform.position = Input.mousePosition + new Vector3(75f, 50f, 0f);
+        }
     }
 
     public void ShowPrompt(string text)
@@ -49,11 +51,7 @@ public class UIManager : MonoBehaviour
 
     public void UpdateRoundDisplay(int round, int maxRounds)
     {
-        // ── Round 0 shows as Tutorial ──────────────
-        if (round == 0)
-            roundText.text = "Tutorial";
-        else
-            roundText.text = $"Round {round}/{maxRounds}";
+        roundText.text = $"Round {round}/{maxRounds}";
     }
 
     public void ShowTooltip(string bugName, string expiry)
