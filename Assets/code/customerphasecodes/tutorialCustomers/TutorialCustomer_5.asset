@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 632547174a3b11340a13d6d0e124664f, type: 3}
+  m_Name: TutorialCustomer_5
+  m_EditorClassIdentifier: 
+  customerName: mouse
+  customerPrefab: {fileID: 7387320819559370606, guid: 03ab9d48d204db44cbad9b344a3008db, type: 3}
+  guaranteedBugType: {fileID: 11400000, guid: acc2f137713a54d4a9913791eaa69e44, type: 2}
+  guaranteedAmount: 1
+  randomRollCount: 0
+  diceTable: []
+  penalty: 1

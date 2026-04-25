@@ -22,6 +22,9 @@ public class CustomerUI : MonoBehaviour
     public Button restockButton;
     public TextMeshProUGUI restockButtonText;
 
+    [Header("Queue Slot Sprites")]
+    public Sprite[] queueSlotSprites;
+
     [Header("Order Panel")]
     public GameObject orderPanel;
     public TextMeshProUGUI customerNameText;
@@ -46,6 +49,7 @@ public class CustomerUI : MonoBehaviour
     private List<GameObject> guaranteedSlotObjects = new List<GameObject>();
     private List<GameObject> randomSlotObjects = new List<GameObject>();
     private List<BugType> revealedRandomBugs = new List<BugType>();
+    private Dictionary<CustomerCard, Sprite> assignedSprites = new Dictionary<CustomerCard, Sprite>();
 
     private int guaranteedFilled = 0;
     private int randomFilled = 0;
@@ -104,6 +108,11 @@ public class CustomerUI : MonoBehaviour
 
     // ── Queue ──────────────────────────────────────
 
+    public void ClearAssignedSprites()
+    {
+        assignedSprites.Clear();
+    }
+
     public void ShowQueue(List<CustomerCard> queue)
     {
         queuePanel.SetActive(true);
@@ -112,10 +121,25 @@ public class CustomerUI : MonoBehaviour
         for (int i = queueContainer.childCount - 1; i >= 0; i--)
             Destroy(queueContainer.GetChild(i).gameObject);
 
-        foreach (CustomerCard card in queue)
+        bool isRound0 = GameManager.Instance.isRound0;
+
+        for (int i = 0; i < queue.Count; i++)
         {
+            CustomerCard card = queue[i];
             GameObject slot = Instantiate(customerQueueSlotPrefab, queueContainer);
             CustomerCard captured = card;
+            bool isFirst = i == 0;
+
+            // ── Random sticky note sprite ──────────
+            if (queueSlotSprites != null && queueSlotSprites.Length > 0)
+            {
+                if (!assignedSprites.ContainsKey(card))
+                    assignedSprites[card] = queueSlotSprites[Random.Range(0, queueSlotSprites.Length)];
+
+                var bg = slot.GetComponent<Image>();
+                if (bg != null)
+                    bg.sprite = assignedSprites[card];
+            }
 
             var nameText = slot.transform.Find("CustomerName")?.GetComponent<TextMeshProUGUI>();
             if (nameText != null) nameText.text = card.customerName;
@@ -125,12 +149,25 @@ public class CustomerUI : MonoBehaviour
                 guaranteedText.text = $"{card.guaranteedAmount}x {card.guaranteedBugType.bugName}";
 
             var icon = slot.transform.Find("BugIcon")?.GetComponent<Image>();
-            Debug.Log($"BugIcon found: {icon != null}"); // ← add this line
             if (icon != null) icon.sprite = card.guaranteedBugType.icon;
 
             var btn = slot.GetComponent<Button>();
             if (btn != null)
-                btn.onClick.AddListener(() => CustomerPhaseManager.Instance.SelectCustomer(captured));
+            {
+                // ── Round 0: only first customer clickable ──
+                if (isRound0 && !isFirst)
+                {
+                    btn.interactable = false;
+                    var bg = slot.GetComponent<Image>();
+                    if (bg != null)
+                        bg.color = new Color(bg.color.r, bg.color.g, bg.color.b, 0.4f);
+                }
+                else
+                {
+                    btn.onClick.AddListener(() =>
+                        CustomerPhaseManager.Instance.SelectCustomer(captured));
+                }
+            }
         }
 
         bool canRestock = !CustomerPhaseManager.Instance.hasRestockedThisRound
@@ -192,7 +229,7 @@ public class CustomerUI : MonoBehaviour
             if (icon != null)
             {
                 icon.sprite = card.guaranteedBugType.icon;
-                icon.color = new Color(1f, 1f, 1f, 0.35f); // ← semi-transparent until filled
+                icon.color = new Color(1f, 1f, 1f, 0.35f);
             }
 
             var label = slot.transform.Find("BugName")?.GetComponent<TextMeshProUGUI>();
@@ -240,7 +277,7 @@ public class CustomerUI : MonoBehaviour
             if (bg != null) bg.color = new Color(0.6f, 1f, 0.6f);
 
             var icon = slot.transform.Find("BugIcon")?.GetComponent<Image>();
-            if (icon != null) icon.color = new Color(1f, 1f, 1f, 1f); // ← fully opaque
+            if (icon != null) icon.color = new Color(1f, 1f, 1f, 1f);
 
             var btn = slot.GetComponent<Button>();
             if (btn != null) btn.interactable = false;
@@ -278,7 +315,7 @@ public class CustomerUI : MonoBehaviour
             if (bg != null) bg.color = new Color(0.6f, 1f, 0.6f);
 
             var icon = slot.transform.Find("BugIcon")?.GetComponent<Image>();
-            if (icon != null) icon.color = new Color(1f, 1f, 1f, 1f); // ← fully opaque
+            if (icon != null) icon.color = new Color(1f, 1f, 1f, 1f);
 
             var btn = slot.GetComponent<Button>();
             if (btn != null) btn.interactable = false;
@@ -331,6 +368,7 @@ public class CustomerUI : MonoBehaviour
             Destroy(oldSlot);
 
             GameObject newSlot = Instantiate(itemSlotPrefab, parent);
+            newSlot.transform.SetSiblingIndex(index);
             randomSlotObjects[index] = newSlot;
 
             if (result != null)
@@ -339,7 +377,7 @@ public class CustomerUI : MonoBehaviour
                 if (icon != null)
                 {
                     icon.sprite = result.icon;
-                    icon.color = new Color(1f, 1f, 1f, 0.35f); // ← semi-transparent until clicked
+                    icon.color = new Color(1f, 1f, 1f, 0.35f);
                 }
 
                 var label = newSlot.transform.Find("BugName")?.GetComponent<TextMeshProUGUI>();
