@@ -70,6 +70,7 @@ public class CobwebManager : MonoBehaviour, IInteractable
         if (GameManager.Instance.currentPhase != GamePhase.Preparation) return;
         pendingOrder.Clear();
         CobwebUI.Instance.OpenShop(currentCard, this);
+        TutorialManager.Instance?.OnCobwebOpened();
     }
 
     // ── Order Management ───────────────────────────
