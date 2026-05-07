@@ -2563,7 +2563,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 574, y: 304}
+  m_AnchoredPosition: {x: 617, y: 317}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &209756370
@@ -2584,7 +2584,7 @@ MonoBehaviour:
     m_Top: 0
     m_Bottom: 0
   m_ChildAlignment: 4
-  m_Spacing: 150
+  m_Spacing: 200
   m_ChildForceExpandWidth: 0
   m_ChildForceExpandHeight: 0
   m_ChildControlWidth: 1
@@ -5487,7 +5487,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 98.564545, y: 363.79266}
+  m_AnchoredPosition: {x: 117, y: 363.79266}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &452635228
@@ -6045,6 +6045,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tutorialPanel: {fileID: 2053711344}
   tutorialText: {fileID: 1139980200}
+  clickToContinueButton: {fileID: 187085900}
   clickToContinueText: {fileID: 1549770357}
   arrowImage: {fileID: 685910018}
   skipButton: {fileID: 216571538}
@@ -6115,7 +6116,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 572, y: 153}
+  m_AnchoredPosition: {x: 617, y: 135}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &508737678
@@ -6136,7 +6137,7 @@ MonoBehaviour:
     m_Top: 0
     m_Bottom: 0
   m_ChildAlignment: 4
-  m_Spacing: 150
+  m_Spacing: 200
   m_ChildForceExpandWidth: 0
   m_ChildForceExpandHeight: 0
   m_ChildControlWidth: 1
@@ -15174,7 +15175,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 231, y: -160}
-  m_SizeDelta: {x: 1743.235, y: 962.31}
+  m_SizeDelta: {x: 1743.235, y: 970.1}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1325658230
 MonoBehaviour:
@@ -17335,8 +17336,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4281479730
-  m_fontColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
+    rgba: 4294967295
+  m_fontColor: {r: 1, g: 1, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
@@ -18271,8 +18272,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a81633bfb2e29334787d3a32fe08ee5a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  stackSpacing: 0.4
-  heightAboveSpider: 1.2
+  stackSpacing: 0.8
+  heightAboveSpider: 1
   carryRowPrefab: {fileID: 8420067342365118748, guid: eeed402b214ce0f4194cae87e377a0ad, type: 3}
 --- !u!1 &1684570994
 GameObject:
@@ -18562,6 +18563,8 @@ MonoBehaviour:
   storagePanel: {fileID: 1048867214}
   gridContainer: {fileID: 1867714257}
   storageSlotPrefab: {fileID: 1552073801496616707, guid: 98886c6c067058c4fad49b940b8948d5, type: 3}
+  selectionFrameSprite: {fileID: -1933823124, guid: 672ba45db6cb7a7408babc02a43cb0f4, type: 3}
+  selectionFrameColor: {r: 1, g: 0.24056602, b: 0.63683146, a: 1}
   carryButton: {fileID: 317053286}
   backButton: {fileID: 1923376212}
   selectedCountText: {fileID: 598243490}
@@ -19113,6 +19116,7 @@ MonoBehaviour:
   rollDiceButton: {fileID: 1809235349}
   cantServeButton: {fileID: 1138369375}
   diceResultText: {fileID: 123227041}
+  slotSpacing: 50
   stockStickyNote: {fileID: 1175211876}
   stockStickyNoteText: {fileID: 1325658230}
   diceSpinDuration: 1.5
@@ -19876,7 +19880,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -782.2, y: 390.3}
+  m_AnchoredPosition: {x: -773.3, y: 390.3}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1867714258
@@ -19899,7 +19903,7 @@ MonoBehaviour:
   m_ChildAlignment: 0
   m_StartCorner: 0
   m_StartAxis: 0
-  m_CellSize: {x: 320, y: 180}
+  m_CellSize: {x: 328.8, y: 176.8}
   m_Spacing: {x: 5, y: 5}
   m_Constraint: 1
   m_ConstraintCount: 5

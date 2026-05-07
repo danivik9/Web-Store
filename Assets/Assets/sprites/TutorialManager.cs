@@ -2,6 +2,7 @@
 using UnityEngine.UI;
 using TMPro;
 using System.Collections;
+using System.Collections.Generic;
 
 public class TutorialManager : MonoBehaviour
 {
@@ -14,6 +15,7 @@ public class TutorialManager : MonoBehaviour
     [Header("UI")]
     public GameObject tutorialPanel;
     public TextMeshProUGUI tutorialText;
+    public GameObject clickToContinueButton;
     public TextMeshProUGUI clickToContinueText;
     public Image arrowImage;
     public Button skipButton;
@@ -56,8 +58,7 @@ public class TutorialManager : MonoBehaviour
     private float arrowBobTimer = 0f;
     private Vector3 arrowBasePosition;
     private int bugAddedCount = 0;
-
-    // ── Step Definition ────────────────────────────
+    private HashSet<TutorialTrigger> preCompletedTriggers = new HashSet<TutorialTrigger>();
 
     enum TutorialTrigger
     {
@@ -87,7 +88,6 @@ public class TutorialManager : MonoBehaviour
         public bool useFixedPosition;
         public Vector2 fixedScreenPosition;
 
-        // ── Target-based arrow ─────────────────────
         public TutorialStep(string text, TutorialTrigger trigger,
                             Transform arrowTarget,
                             float arrowRotation,
@@ -102,7 +102,6 @@ public class TutorialManager : MonoBehaviour
             this.fixedScreenPosition = Vector2.zero;
         }
 
-        // ── Fixed screen position arrow ────────────
         public TutorialStep(string text, TutorialTrigger trigger,
                             float arrowRotation,
                             float screenX, float screenY)
@@ -119,18 +118,14 @@ public class TutorialManager : MonoBehaviour
 
     private TutorialStep[] steps;
 
-    // ── Lifecycle ──────────────────────────────────
-
-    void Awake()
-    {
-        Instance = this;
-    }
+    void Awake() { Instance = this; }
 
     void Start()
     {
         mainCamera = Camera.main;
         tutorialPanel.SetActive(false);
         arrowImage.gameObject.SetActive(false);
+        clickToContinueButton.SetActive(false);
         skipButton.onClick.AddListener(Skip);
 
         BuildSteps();
@@ -183,23 +178,18 @@ public class TutorialManager : MonoBehaviour
             new TutorialStep(
                 "Welcome to Web-Store! You're a spider running a bug grocery store.",
                 TutorialTrigger.Click, null, -90f, 0f, 80f),
-
             new TutorialStep(
                 "You have 6 days to earn $200 to pay off your bank loan. Good luck!",
                 TutorialTrigger.Click, null, -90f, 0f, 80f),
-
             new TutorialStep(
                 "Each day has 3 phases. Let's go through them!",
                 TutorialTrigger.Click, null, -90f, 0f, 80f),
-
             new TutorialStep(
                 "Phase 1: Preparation - buy bugs from the Cobweb Shop and stock your shelves.",
                 TutorialTrigger.Click, null, -90f, 0f, 80f),
-
             new TutorialStep(
                 "Phase 2: Customer - open the store and serve customers at the register.",
                 TutorialTrigger.Click, null, -90f, 0f, 80f),
-
             new TutorialStep(
                 "Phase 3: Breakdown - see how the day went and what expired overnight.",
                 TutorialTrigger.Click, null, -90f, 0f, 80f),
@@ -208,7 +198,6 @@ public class TutorialManager : MonoBehaviour
             new TutorialStep(
                 "Let's start! Head to the Storage Room through the door on the left - that's where you buy and store your inventory!",
                 TutorialTrigger.StorageEntered, storageDoorTarget, 180f, 80f, 0f),
-
             new TutorialStep(
                 "This is the Storage Room! The Cobweb Shop is in the top right corner. Press E on the cobweb to open the shop!",
                 TutorialTrigger.CobwebOpened, cobwebTarget, -90f, 0f, 80f),
@@ -217,11 +206,9 @@ public class TutorialManager : MonoBehaviour
             new TutorialStep(
                 "Welcome to the Cobweb Shop! Click a bug type button on the right to add it to your order.",
                 TutorialTrigger.BugAddedToCart, bugButtonsContainerTarget, 0f, -120f, 0f),
-
             new TutorialStep(
                 "Your bug appeared on the web! Added too many? Click a bug on the web to remove it.",
                 TutorialTrigger.Click, webItemsContainerTarget, -90f, 0f, 80f),
-
             new TutorialStep(
                 "Happy with your order? Hit Collect to buy everything on the web!",
                 TutorialTrigger.CobwebBought, collectButtonTarget, -90f, 0f, 80f),
@@ -230,12 +217,9 @@ public class TutorialManager : MonoBehaviour
             new TutorialStep(
                 "Great purchase! Now head to the Storage Shelf on the left wall and press E to open it.",
                 TutorialTrigger.StorageOpened, storageShelfTarget, 0f, -100f, 0f),
-
-            // ── Fixed center screen arrow ──────────
             new TutorialStep(
                 "This is your Storage Shelf! Each bug shows how many days until it expires. Hover over any bug to see details!",
                 TutorialTrigger.Click, 90f, 960f, 400f),
-
             new TutorialStep(
                 "Click bugs to select them - up to 5 at a time. Then hit Carry to pick them up!",
                 TutorialTrigger.BugsCarried, carryButtonTarget, -90f, 0f, 80f),
@@ -244,15 +228,12 @@ public class TutorialManager : MonoBehaviour
             new TutorialStep(
                 "Bugs are floating above your head! Head back to the store and press E on a shelf to place them. Each shelf only accepts one bug type!",
                 TutorialTrigger.BugsPlaced, storeShelfTarget, -90f, 0f, 80f),
-
             new TutorialStep(
                 "Nice stocking! Carrying the wrong bugs? Walk back to the Storage Shelf and press E to return them.",
                 TutorialTrigger.Click, null, -90f, 0f, 80f),
-
             new TutorialStep(
                 "Watch expiry dates! Hover any bug to check. Expired bugs cost $1 each — Fruit Flies only last 1 day!",
                 TutorialTrigger.Click, null, -90f, 0f, 80f),
-
             new TutorialStep(
                 "Important: once the store is open the Cobweb Shop closes! Buy everything you need before opening the doors.",
                 TutorialTrigger.Click, null, -90f, 0f, 80f),
@@ -266,15 +247,12 @@ public class TutorialManager : MonoBehaviour
             new TutorialStep(
                 "Customers are coming in! Walk to the Register and press E to start serving.",
                 TutorialTrigger.RegisterOpened, registerTarget, -90f, 0f, 80f),
-
             new TutorialStep(
                 "This is the customer queue! Each card shows the customer and what they want. Click a card to call them!",
                 TutorialTrigger.CustomerCalled, queueContainerTarget, 90f, 0f, -110f),
-
             new TutorialStep(
                 "See the guaranteed item slots? Click them to place that bug from your shelves onto the counter!",
                 TutorialTrigger.Click, guaranteedSlotsContainerTarget, -90f, 0f, 80f),
-
             new TutorialStep(
                 "All guaranteed slots filled! Roll the dice to reveal mystery items — then click the slot to fill it!",
                 TutorialTrigger.CustomerServed, rollDiceButtonTarget, 0f, -150f, 0f),
@@ -293,7 +271,6 @@ public class TutorialManager : MonoBehaviour
             new TutorialStep(
                 "Hmm, looks like you can't fill this order. Place what you can — then hit Can't Serve!",
                 TutorialTrigger.CantServeUsed, cantServeButtonTarget, 180f, 150f, 0f),
-
             new TutorialStep(
                 "Any bugs you already placed are lost and you take a penalty! Plan ahead and stock up before opening.",
                 TutorialTrigger.Click, null, -90f, 0f, 80f),
@@ -321,6 +298,7 @@ public class TutorialManager : MonoBehaviour
     {
         isActive = true;
         currentStep = 0;
+        preCompletedTriggers.Clear();
         tutorialPanel.SetActive(true);
         ShowStep(0);
     }
@@ -336,13 +314,15 @@ public class TutorialManager : MonoBehaviour
         if (index == CANT_SERVE_STEP)
             CustomerPhaseManager.Instance?.MoveUnservableCustomerToFront();
 
+        // ── Refresh button states at key steps ────
+        if (index == CANT_SERVE_STEP || index == 27)
+            CustomerUI.Instance?.RefreshButtonStates();
+
         TutorialStep step = steps[index];
         InteractionManager.IsLocked = false;
-
         arrowBobTimer = 0f;
 
-        bool hasArrow = step.arrowTarget != null || step.useFixedPosition;
-        if (hasArrow)
+        if (step.arrowTarget != null || step.useFixedPosition)
         {
             arrowImage.gameObject.SetActive(true);
             if (step.useFixedPosition)
@@ -360,7 +340,14 @@ public class TutorialManager : MonoBehaviour
 
         skipButton.gameObject.SetActive(waitingForClick);
 
-        clickToContinueText.gameObject.SetActive(false);
+        if (waitingForAction && preCompletedTriggers.Contains(step.trigger))
+        {
+            preCompletedTriggers.Remove(step.trigger);
+            AdvanceStep();
+            return;
+        }
+
+        clickToContinueButton.SetActive(false);
         StopAllCoroutines();
         StartCoroutine(TypeText(step.text));
     }
@@ -409,7 +396,7 @@ public class TutorialManager : MonoBehaviour
             tutorialText.text = steps[currentStep].text;
             isTyping = false;
             InteractionManager.IsLocked = false;
-            clickToContinueText.gameObject.SetActive(true);
+            clickToContinueButton.SetActive(true);
             return;
         }
 
@@ -425,7 +412,9 @@ public class TutorialManager : MonoBehaviour
 
     // ── Public Helpers ─────────────────────────────
 
-    public bool IsDoorStepReached() => currentStep >= 18;
+    public bool IsDoorStepReached() => !isActive || currentStep >= 18;
+    public bool IsCantServeAllowed() => !isActive || currentStep >= CANT_SERVE_STEP;
+    public bool IsRestockAllowed() => !isActive || currentStep >= 27;
 
     // ── Trigger Hooks ──────────────────────────────
 
@@ -457,7 +446,13 @@ public class TutorialManager : MonoBehaviour
     void TryAdvance(TutorialTrigger trigger)
     {
         if (!isActive) return;
-        if (!waitingForAction) return;
+
+        if (!waitingForAction)
+        {
+            preCompletedTriggers.Add(trigger);
+            return;
+        }
+
         if (steps[currentStep].trigger != trigger) return;
         InteractionManager.IsLocked = false;
         AdvanceStep();
@@ -470,6 +465,7 @@ public class TutorialManager : MonoBehaviour
         isActive = false;
         tutorialPanel.SetActive(false);
         arrowImage.gameObject.SetActive(false);
+        clickToContinueButton.SetActive(false);
         InteractionManager.IsLocked = false;
 
         PlayerPrefs.SetInt(PREFS_KEY, 1);
@@ -496,7 +492,6 @@ public class TutorialManager : MonoBehaviour
         if (target == null) return;
 
         Vector3 screenPos;
-
         if (target.GetComponent<RectTransform>() != null)
             screenPos = target.position;
         else
@@ -518,7 +513,7 @@ public class TutorialManager : MonoBehaviour
     {
         isTyping = true;
         tutorialText.text = "";
-        clickToContinueText.gameObject.SetActive(false);
+        clickToContinueButton.SetActive(false);
 
         foreach (char c in text)
         {
@@ -529,6 +524,6 @@ public class TutorialManager : MonoBehaviour
         isTyping = false;
         InteractionManager.IsLocked = false;
         if (waitingForClick)
-            clickToContinueText.gameObject.SetActive(true);
+            clickToContinueButton.SetActive(true);
     }
 }

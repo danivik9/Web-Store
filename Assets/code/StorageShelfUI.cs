@@ -14,6 +14,10 @@ public class StorageShelfUI : MonoBehaviour
     public Transform gridContainer;
     public GameObject storageSlotPrefab;
 
+    [Header("Selection Frame")]
+    public Sprite selectionFrameSprite;
+    public Color selectionFrameColor = Color.white;
+
     [Header("Buttons")]
     public Button carryButton;
     public Button backButton;
@@ -25,6 +29,7 @@ public class StorageShelfUI : MonoBehaviour
 
     private List<BugToken> selectedTokens = new List<BugToken>();
     private List<GameObject> spawnedSlots = new List<GameObject>();
+    private Dictionary<GameObject, GameObject> slotFrames = new Dictionary<GameObject, GameObject>();
     private CameraFollow cameraFollow;
     private SpiderMovement spiderMovement;
     private GameObject spiderObject;
@@ -86,6 +91,7 @@ public class StorageShelfUI : MonoBehaviour
 
         cameraFollow.ReturnToFollow();
         selectedTokens.Clear();
+        slotFrames.Clear();
     }
 
     // ── Grid ───────────────────────────────────────
@@ -96,6 +102,7 @@ public class StorageShelfUI : MonoBehaviour
             Destroy(gridContainer.GetChild(i).gameObject);
 
         spawnedSlots.Clear();
+        slotFrames.Clear();
 
         List<BugToken> items = StorageInventory.Instance.GetItems();
 
@@ -144,13 +151,14 @@ public class StorageShelfUI : MonoBehaviour
         }
     }
 
+    // ── Selection ──────────────────────────────────
+
     void ToggleSelect(BugToken token, GameObject slot)
     {
         if (selectedTokens.Contains(token))
         {
             selectedTokens.Remove(token);
-            var img = slot.GetComponent<Image>();
-            if (img != null) img.color = Color.white;
+            RemoveFrame(slot);
         }
         else
         {
@@ -160,11 +168,43 @@ public class StorageShelfUI : MonoBehaviour
                 return;
             }
             selectedTokens.Add(token);
-            var img = slot.GetComponent<Image>();
-            if (img != null) img.color = new Color(0.5f, 1f, 0.5f);
+            AddFrame(slot);
         }
 
         UpdateSelectedCount();
+    }
+
+    void AddFrame(GameObject slot)
+    {
+        if (selectionFrameSprite == null) return;
+        if (slotFrames.ContainsKey(slot)) return;
+
+        GameObject frame = new GameObject("SelectionFrame");
+        frame.transform.SetParent(slot.transform, false);
+
+        RectTransform rt = frame.AddComponent<RectTransform>();
+        rt.anchorMin = Vector2.zero;
+        rt.anchorMax = Vector2.one;
+        rt.offsetMin = Vector2.zero;
+        rt.offsetMax = Vector2.zero;
+
+        Image img = frame.AddComponent<Image>();
+        img.sprite = selectionFrameSprite;
+        img.type = Image.Type.Simple;
+        img.color = selectionFrameColor;
+        img.raycastTarget = false;
+
+        frame.transform.SetAsLastSibling();
+        slotFrames[slot] = frame;
+    }
+
+    void RemoveFrame(GameObject slot)
+    {
+        if (slotFrames.TryGetValue(slot, out GameObject frame))
+        {
+            Destroy(frame);
+            slotFrames.Remove(slot);
+        }
     }
 
     void UpdateSelectedCount()

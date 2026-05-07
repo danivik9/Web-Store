@@ -36,6 +36,9 @@ public class CustomerUI : MonoBehaviour
     public Button cantServeButton;
     public TextMeshProUGUI diceResultText;
 
+    [Header("Slot Layout")]
+    public float slotSpacing = 15f;
+
     [Header("Stock Sticky Note")]
     public GameObject stockStickyNote;
     public TextMeshProUGUI stockStickyNoteText;
@@ -72,9 +75,19 @@ public class CustomerUI : MonoBehaviour
         stockStickyNote.SetActive(false);
         restockButton.gameObject.SetActive(false);
 
-        restockButton.onClick.AddListener(OnRestock);
+        restockButton.onClick.AddListener(() =>
+        {
+            if (TutorialManager.Instance != null && !TutorialManager.Instance.IsRestockAllowed()) return;
+            OnRestock();
+        });
+
         rollDiceButton.onClick.AddListener(() => StartCoroutine(RollDice()));
-        cantServeButton.onClick.AddListener(OnCantServe);
+
+        cantServeButton.onClick.AddListener(() =>
+        {
+            if (TutorialManager.Instance != null && !TutorialManager.Instance.IsCantServeAllowed()) return;
+            OnCantServe();
+        });
     }
 
     // ── Camera ─────────────────────────────────────
@@ -133,7 +146,6 @@ public class CustomerUI : MonoBehaviour
             CustomerCard captured = card;
             bool isFirst = i == 0;
 
-            // ── Random sticky note sprite ──────────
             if (queueSlotSprites != null && queueSlotSprites.Length > 0)
             {
                 if (!assignedSprites.ContainsKey(card))
@@ -157,7 +169,6 @@ public class CustomerUI : MonoBehaviour
             var btn = slot.GetComponent<Button>();
             if (btn != null)
             {
-                // ── Round 0: only first customer clickable ──
                 if (isRound0 && !isFirst)
                 {
                     btn.interactable = false;
@@ -178,7 +189,8 @@ public class CustomerUI : MonoBehaviour
 
         bool canRestock = !CustomerPhaseManager.Instance.hasRestockedThisRound
             && queue.Count > 0
-            && StorageInventory.Instance.GetCount() > 0;
+            && StorageInventory.Instance.GetCount() > 0
+            && (TutorialManager.Instance == null || TutorialManager.Instance.IsRestockAllowed());
         restockButton.interactable = canRestock;
         restockButtonText.text = CustomerPhaseManager.Instance.hasRestockedThisRound
             ? "Restocked"
@@ -189,6 +201,32 @@ public class CustomerUI : MonoBehaviour
     {
         queuePanel.SetActive(false);
         ReturnFromRegister();
+    }
+
+    // ── Button State Refresh ───────────────────────
+
+    public void RefreshButtonStates()
+    {
+        // ── Restock ────────────────────────────────
+        if (restockButton.gameObject.activeSelf)
+        {
+            bool canRestock = !CustomerPhaseManager.Instance.hasRestockedThisRound
+                && CustomerPhaseManager.Instance.GetQueue().Count > 0
+                && StorageInventory.Instance.GetCount() > 0
+                && (TutorialManager.Instance == null || TutorialManager.Instance.IsRestockAllowed());
+            restockButton.interactable = canRestock;
+        }
+
+        // ── Can't Serve dimming ────────────────────
+        if (cantServeButton.gameObject.activeSelf)
+        {
+            bool cantServeAllowed = TutorialManager.Instance == null
+                || TutorialManager.Instance.IsCantServeAllowed();
+            var img = cantServeButton.GetComponent<Image>();
+            if (img != null)
+                img.color = new Color(img.color.r, img.color.g, img.color.b,
+                    cantServeAllowed ? 1f : 0.35f);
+        }
     }
 
     // ── Order Panel ────────────────────────────────
@@ -213,6 +251,9 @@ public class CustomerUI : MonoBehaviour
         BuildGuaranteedSlots(card);
         BuildHiddenSlots(card.randomRollCount);
         UpdateStockStickyNote();
+
+        // ── Apply button states on open ────────────
+        RefreshButtonStates();
     }
 
     public void CloseCustomerOrder()
@@ -252,6 +293,8 @@ public class CustomerUI : MonoBehaviour
 
             guaranteedSlotObjects.Add(slot);
         }
+
+        CenterSlots(guaranteedSlotsContainer, guaranteedSlotObjects);
     }
 
     void BuildHiddenSlots(int count)
@@ -261,14 +304,42 @@ public class CustomerUI : MonoBehaviour
             GameObject slot = Instantiate(hiddenSlotPrefab, randomSlotsContainer);
             randomSlotObjects.Add(slot);
         }
+
+        CenterSlots(randomSlotsContainer, randomSlotObjects);
     }
 
     void ClearSlots()
     {
-        foreach (GameObject s in guaranteedSlotObjects) Destroy(s);
-        foreach (GameObject s in randomSlotObjects) Destroy(s);
+        foreach (GameObject s in guaranteedSlotObjects) if (s != null) Destroy(s);
+        foreach (GameObject s in randomSlotObjects) if (s != null) Destroy(s);
         guaranteedSlotObjects.Clear();
         randomSlotObjects.Clear();
+    }
+
+    // ── Slot Centering ─────────────────────────────
+
+    void CenterSlots(Transform container, List<GameObject> slots)
+    {
+        if (slots.Count == 0) return;
+
+        var lg = container.GetComponent<HorizontalLayoutGroup>();
+        if (lg != null) lg.enabled = false;
+
+        RectTransform firstRT = slots[0].GetComponent<RectTransform>();
+        float actualWidth = firstRT.sizeDelta.x;
+
+        float totalWidth = slots.Count * actualWidth + (slots.Count - 1) * slotSpacing;
+        float startX = -totalWidth / 2f + actualWidth / 2f;
+
+        for (int i = 0; i < slots.Count; i++)
+        {
+            RectTransform rt = slots[i].GetComponent<RectTransform>();
+            if (rt == null) continue;
+            rt.anchorMin = new Vector2(0.5f, 0.5f);
+            rt.anchorMax = new Vector2(0.5f, 0.5f);
+            rt.pivot = new Vector2(0.5f, 0.5f);
+            rt.anchoredPosition = new Vector2(startX + i * (actualWidth + slotSpacing), 0f);
+        }
     }
 
     // ── Slot Clicks ────────────────────────────────
@@ -371,10 +442,11 @@ public class CustomerUI : MonoBehaviour
         {
             GameObject oldSlot = randomSlotObjects[index];
             Transform parent = oldSlot.transform.parent;
+            int siblingIndex = oldSlot.transform.GetSiblingIndex();
             Destroy(oldSlot);
 
             GameObject newSlot = Instantiate(itemSlotPrefab, parent);
-            newSlot.transform.SetSiblingIndex(index);
+            newSlot.transform.SetSiblingIndex(siblingIndex);
             randomSlotObjects[index] = newSlot;
 
             if (result != null)
@@ -400,6 +472,8 @@ public class CustomerUI : MonoBehaviour
 
                 diceResultText.text = $"Rolled {result.bugName}!";
             }
+
+            CenterSlots(randomSlotsContainer, randomSlotObjects);
         }
 
         currentRandomRollIndex++;
@@ -430,11 +504,14 @@ public class CustomerUI : MonoBehaviour
         Shelf[] shelves = FindObjectsOfType<Shelf>();
         string text = "ON SHELVES\n";
 
+        int index = 1;
         foreach (Shelf shelf in shelves)
         {
             if (shelf.acceptedBugType == null) continue;
             int count = shelf.GetOccupiedCount();
-            text += $"{shelf.acceptedBugType.bugName}: {count}\n";
+            string spades = new string('♠', index);
+            text += $"{spades} {shelf.acceptedBugType.bugName}: {count}\n";
+            index++;
         }
 
         stockStickyNoteText.text = text;
@@ -446,9 +523,28 @@ public class CustomerUI : MonoBehaviour
     {
         var bg = slot.GetComponent<Image>();
         if (bg == null) yield break;
+
+        RectTransform rt = slot.GetComponent<RectTransform>();
         Color original = bg.color;
-        bg.color = Color.red;
-        yield return new WaitForSeconds(0.3f);
+        Vector2 originalPos = rt.anchoredPosition;
+
+        bg.color = new Color(1f, 0.3f, 0.3f);
+
+        float duration = 0.6f;
+        float elapsed = 0f;
+        float shakeStrength = 10f;
+        float shakeSpeed = 45f;
+
+        while (elapsed < duration)
+        {
+            float xOffset = Mathf.Sin(elapsed * shakeSpeed) * shakeStrength
+                            * (1f - elapsed / duration);
+            rt.anchoredPosition = originalPos + new Vector2(xOffset, 0f);
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+
+        rt.anchoredPosition = originalPos;
         bg.color = original;
     }
 }
