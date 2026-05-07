@@ -509,8 +509,8 @@ public class CustomerUI : MonoBehaviour
         {
             if (shelf.acceptedBugType == null) continue;
             int count = shelf.GetOccupiedCount();
-            string spades = new string('♠', index);
-            text += $"{spades} {shelf.acceptedBugType.bugName}: {count}\n";
+            string indent = new string(' ', index);
+            text += $"{indent}{shelf.acceptedBugType.bugName}: {count}\n";
             index++;
         }
 
