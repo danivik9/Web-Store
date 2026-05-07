@@ -1,69 +1,9 @@
 fileFormatVersion: 2
-guid: 64b02877d4d800e4686c8630c1bc344c
+guid: dfce22272078780458faf0ceb354dc96
 ModelImporter:
   serializedVersion: 22200
   internalIDToNameTable: []
-  externalObjects:
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: 1 day kaste
-    second: {fileID: 2100000, guid: 1b31aba3bcc980142bbb869bd98a44f3, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: 2 day kaste
-    second: {fileID: 2100000, guid: 1580fe5c9063b99429f9f672287c9737, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: 3 day kaste
-    second: {fileID: 2100000, guid: af7a19b7424a7404db24212b6d0ce097, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: durvis storage
-    second: {fileID: 2100000, guid: a12d3b4530c5f864db054da8da99a264, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: durvis veikalam
-    second: {fileID: 2100000, guid: 67fb0859c14807e45b84c049877f2761, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: frozen
-    second: {fileID: 2100000, guid: 8a5bba2636cf35a40a2dc8462b1e1ba9, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: grida
-    second: {fileID: 2100000, guid: 21e8eaa7d6e5d134da59a23c6fdcd5ca, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: kase
-    second: {fileID: 2100000, guid: fbb82e2a19c575b4482ab439367b57d9, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: koks
-    second: {fileID: 2100000, guid: bd0addaae1338a44b9a338080ab68792, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: logs
-    second: {fileID: 2100000, guid: 4e302d9b216cf434f82600fd21cc7bee, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: sienas
-    second: {fileID: 2100000, guid: 90efcbfa040d7dd4c920a9b6fb57fdb5, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: skapis 4 days
-    second: {fileID: 2100000, guid: 3c1b45700ba4a3345bc45204cd41e89f, type: 2}
+  externalObjects: {}
   materials:
     materialImportMode: 2
     materialName: 0
