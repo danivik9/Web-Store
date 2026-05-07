@@ -8,7 +8,7 @@ public class TutorialManager : MonoBehaviour
     public static TutorialManager Instance;
 
     const string PREFS_KEY = "TutorialComplete";
-    const int CANT_SERVE_STEP = 24;
+    const int CANT_SERVE_STEP = 25;
 
     // ── UI ─────────────────────────────────────────
     [Header("UI")]
@@ -43,12 +43,19 @@ public class TutorialManager : MonoBehaviour
     [Header("Settings")]
     public float typewriterSpeed = 0.025f;
 
+    [Header("Arrow Bob")]
+    public float arrowBobSpeed = 4f;
+    public float arrowBobAmount = 12f;
+
     private int currentStep = 0;
     private bool isTyping = false;
     private bool isActive = false;
     private bool waitingForClick = false;
     private bool waitingForAction = false;
     private Camera mainCamera;
+    private float arrowBobTimer = 0f;
+    private Vector3 arrowBasePosition;
+    private int bugAddedCount = 0;
 
     // ── Step Definition ────────────────────────────
 
@@ -77,18 +84,36 @@ public class TutorialManager : MonoBehaviour
         public Transform arrowTarget;
         public float arrowRotation;
         public Vector2 arrowOffset;
+        public bool useFixedPosition;
+        public Vector2 fixedScreenPosition;
 
+        // ── Target-based arrow ─────────────────────
         public TutorialStep(string text, TutorialTrigger trigger,
                             Transform arrowTarget,
                             float arrowRotation,
-                            float offsetX,
-                            float offsetY)
+                            float offsetX, float offsetY)
         {
             this.text = text;
             this.trigger = trigger;
             this.arrowTarget = arrowTarget;
             this.arrowRotation = arrowRotation;
             this.arrowOffset = new Vector2(offsetX, offsetY);
+            this.useFixedPosition = false;
+            this.fixedScreenPosition = Vector2.zero;
+        }
+
+        // ── Fixed screen position arrow ────────────
+        public TutorialStep(string text, TutorialTrigger trigger,
+                            float arrowRotation,
+                            float screenX, float screenY)
+        {
+            this.text = text;
+            this.trigger = trigger;
+            this.arrowTarget = null;
+            this.arrowRotation = arrowRotation;
+            this.arrowOffset = Vector2.zero;
+            this.useFixedPosition = true;
+            this.fixedScreenPosition = new Vector2(screenX, screenY);
         }
     }
 
@@ -122,7 +147,6 @@ public class TutorialManager : MonoBehaviour
     void SetupRound0()
     {
         BugType[] bugs = CobwebManager.Instance.GetAllBugTypes();
-        // 0=FruitFly  1=Ant  2=Mosquito  3=Maggot  4=Moth
 
         int[] shelfAmounts = { 2, 3, 3, 3, 2 };
         int storageAmount = 2;
@@ -192,7 +216,7 @@ public class TutorialManager : MonoBehaviour
             // ── Cobweb Shop ───────────────────────── 8-10
             new TutorialStep(
                 "Welcome to the Cobweb Shop! Click a bug type button on the right to add it to your order.",
-                TutorialTrigger.BugAddedToCart, bugButtonsContainerTarget, -90f, 0f, 80f),
+                TutorialTrigger.BugAddedToCart, bugButtonsContainerTarget, 0f, -120f, 0f),
 
             new TutorialStep(
                 "Your bug appeared on the web! Added too many? Click a bug on the web to remove it.",
@@ -205,11 +229,12 @@ public class TutorialManager : MonoBehaviour
             // ── Storage Shelf ─────────────────────── 11-13
             new TutorialStep(
                 "Great purchase! Now head to the Storage Shelf on the left wall and press E to open it.",
-                TutorialTrigger.StorageOpened, storageShelfTarget, -90f, 0f, 80f),
+                TutorialTrigger.StorageOpened, storageShelfTarget, 0f, -100f, 0f),
 
+            // ── Fixed center screen arrow ──────────
             new TutorialStep(
-                "This is your Storage Shelf! Each bug shows how many days until it expires. Hover over any bug to see full details!",
-                TutorialTrigger.Click, gridContainerTarget, -90f, 0f, 80f),
+                "This is your Storage Shelf! Each bug shows how many days until it expires. Hover over any bug to see details!",
+                TutorialTrigger.Click, 90f, 960f, 400f),
 
             new TutorialStep(
                 "Click bugs to select them - up to 5 at a time. Then hit Carry to pick them up!",
@@ -225,11 +250,11 @@ public class TutorialManager : MonoBehaviour
                 TutorialTrigger.Click, null, -90f, 0f, 80f),
 
             new TutorialStep(
-                "Each bug has its own expiry date. Hover your cursor over any bug to check when it expires. Expired bugs cost $1 each at end of day - Fruit Flies only last 1 day!",
+                "Watch expiry dates! Hover any bug to check. Expired bugs cost $1 each — Fruit Flies only last 1 day!",
                 TutorialTrigger.Click, null, -90f, 0f, 80f),
 
             new TutorialStep(
-                "Important: once the store is open the Cobweb Shop closes! Make sure you buy everything you need before opening the doors.",
+                "Important: once the store is open the Cobweb Shop closes! Buy everything you need before opening the doors.",
                 TutorialTrigger.Click, null, -90f, 0f, 80f),
 
             // ── Opening the Store ─────────────────── 18
@@ -243,44 +268,49 @@ public class TutorialManager : MonoBehaviour
                 TutorialTrigger.RegisterOpened, registerTarget, -90f, 0f, 80f),
 
             new TutorialStep(
-                "This is the customer queue! Each card shows the customer and what they want. Click a card to call them to the register!",
-                TutorialTrigger.CustomerCalled, queueContainerTarget, -90f, 0f, 80f),
+                "This is the customer queue! Each card shows the customer and what they want. Click a card to call them!",
+                TutorialTrigger.CustomerCalled, queueContainerTarget, 90f, 0f, -110f),
 
             new TutorialStep(
                 "See the guaranteed item slots? Click them to place that bug from your shelves onto the counter!",
                 TutorialTrigger.Click, guaranteedSlotsContainerTarget, -90f, 0f, 80f),
 
             new TutorialStep(
-                "Once all guaranteed slots are filled, roll the dice to reveal mystery items - then click the revealed slot to fill it!",
-                TutorialTrigger.CustomerServed, rollDiceButtonTarget, -90f, 0f, 80f),
+                "All guaranteed slots filled! Roll the dice to reveal mystery items — then click the slot to fill it!",
+                TutorialTrigger.CustomerServed, rollDiceButtonTarget, 0f, -150f, 0f),
 
             // ── Second Customer ───────────────────── 23
             new TutorialStep(
                 "Great job! Now try serving the next customer yourself.",
                 TutorialTrigger.CustomerServed, null, -90f, 0f, 80f),
 
-            // ── Can't Serve ───────────────────────── 24-25
+            // ── Call Can't Serve Customer ─────────── 24
             new TutorialStep(
-                "Hmm, you might not have all the bugs for this next customer. Fill what you can - if you can't complete the order, hit Can't Serve!",
-                TutorialTrigger.CantServeUsed, cantServeButtonTarget, -90f, 0f, 80f),
+                "Now click the next customer card to call them to the register.",
+                TutorialTrigger.CustomerCalled, queueContainerTarget, 90f, 0f, -110f),
+
+            // ── Can't Serve ───────────────────────── 25
+            new TutorialStep(
+                "Hmm, looks like you can't fill this order. Place what you can — then hit Can't Serve!",
+                TutorialTrigger.CantServeUsed, cantServeButtonTarget, 180f, 150f, 0f),
 
             new TutorialStep(
-                "Any bugs you already placed are lost and you take a penalty! Plan ahead and make sure you have enough stock before opening.",
+                "Any bugs you already placed are lost and you take a penalty! Plan ahead and stock up before opening.",
                 TutorialTrigger.Click, null, -90f, 0f, 80f),
 
-            // ── Restock ───────────────────────────── 26
+            // ── Restock ───────────────────────────── 27
             new TutorialStep(
-                "Running low on shelf stock? You can restock mid-round from storage - but it costs you one customer from the queue! Hit Restock when ready.",
-                TutorialTrigger.RestockUsed, restockButtonTarget, -90f, 0f, 80f),
+                "Low on stock? Restock from storage mid-round — but it costs you one customer!",
+                TutorialTrigger.RestockUsed, restockButtonTarget, -90f, 0f, 110f),
 
-            // ── Final Customer ────────────────────── 27
+            // ── Final Customer ────────────────────── 28
             new TutorialStep(
                 "Good thinking! Now serve the remaining customer to wrap up the tutorial.",
                 TutorialTrigger.CustomerServed, null, -90f, 0f, 80f),
 
-            // ── End ───────────────────────────────── 28
+            // ── End ───────────────────────────────── 29
             new TutorialStep(
-                "Amazing! You're a natural shopkeeper. The real game starts now - 6 days, $200 goal, and the bank is watching. Run your store well!",
+                "Amazing! You're a natural shopkeeper. The real game starts now - 6 days, $200 goal, and the bank is watching. Good luck!",
                 TutorialTrigger.Click, null, -90f, 0f, 80f),
         };
     }
@@ -309,10 +339,16 @@ public class TutorialManager : MonoBehaviour
         TutorialStep step = steps[index];
         InteractionManager.IsLocked = false;
 
-        if (step.arrowTarget != null)
+        arrowBobTimer = 0f;
+
+        bool hasArrow = step.arrowTarget != null || step.useFixedPosition;
+        if (hasArrow)
         {
             arrowImage.gameObject.SetActive(true);
-            UpdateArrowPosition(step.arrowTarget, step.arrowOffset, step.arrowRotation);
+            if (step.useFixedPosition)
+                SetArrowFixed(step.fixedScreenPosition, step.arrowRotation);
+            else
+                UpdateArrowPosition(step.arrowTarget, step.arrowOffset, step.arrowRotation);
         }
         else
         {
@@ -322,7 +358,6 @@ public class TutorialManager : MonoBehaviour
         waitingForClick = step.trigger == TutorialTrigger.Click;
         waitingForAction = !waitingForClick;
 
-        // ── Hide skip on action steps ──────────────
         skipButton.gameObject.SetActive(waitingForClick);
 
         clickToContinueText.gameObject.SetActive(false);
@@ -334,15 +369,40 @@ public class TutorialManager : MonoBehaviour
     {
         if (!isActive) return;
 
-        if (currentStep < steps.Length && steps[currentStep].arrowTarget != null)
-            UpdateArrowPosition(
-                steps[currentStep].arrowTarget,
-                steps[currentStep].arrowOffset,
-                steps[currentStep].arrowRotation);
+        if (currentStep < steps.Length)
+        {
+            TutorialStep step = steps[currentStep];
+            bool hasArrow = step.arrowTarget != null || step.useFixedPosition;
+
+            if (hasArrow)
+            {
+                if (step.useFixedPosition)
+                    SetArrowFixed(step.fixedScreenPosition, step.arrowRotation);
+                else
+                    UpdateArrowPosition(step.arrowTarget, step.arrowOffset, step.arrowRotation);
+
+                arrowBasePosition = arrowImage.rectTransform.position;
+                arrowBobTimer += Time.deltaTime * arrowBobSpeed;
+
+                float rotation = step.arrowRotation;
+                Vector3 bobDir;
+
+                if (Mathf.Abs(Mathf.DeltaAngle(rotation, -90f)) < 45f)
+                    bobDir = Vector3.up;
+                else if (Mathf.Abs(Mathf.DeltaAngle(rotation, 90f)) < 45f)
+                    bobDir = Vector3.down;
+                else if (Mathf.Abs(Mathf.DeltaAngle(rotation, 180f)) < 45f)
+                    bobDir = Vector3.left;
+                else
+                    bobDir = Vector3.right;
+
+                arrowImage.rectTransform.position = arrowBasePosition +
+                    bobDir * (Mathf.Sin(arrowBobTimer) * arrowBobAmount);
+            }
+        }
 
         if (!waitingForClick) return;
 
-        // Click during typewriter → skip to end of text
         if (Input.GetMouseButtonDown(0) && isTyping)
         {
             StopAllCoroutines();
@@ -353,7 +413,6 @@ public class TutorialManager : MonoBehaviour
             return;
         }
 
-        // Click after typing → advance
         if (Input.GetMouseButtonDown(0) && !isTyping)
             AdvanceStep();
     }
@@ -372,8 +431,6 @@ public class TutorialManager : MonoBehaviour
 
     public void OnStorageEntered() => TryAdvance(TutorialTrigger.StorageEntered);
     public void OnCobwebOpened() => TryAdvance(TutorialTrigger.CobwebOpened);
-    public void OnBugAddedToCart() => TryAdvance(TutorialTrigger.BugAddedToCart);
-    public void OnCobwebBought() => TryAdvance(TutorialTrigger.CobwebBought);
     public void OnStorageOpened() => TryAdvance(TutorialTrigger.StorageOpened);
     public void OnBugsCarried() => TryAdvance(TutorialTrigger.BugsCarried);
     public void OnBugsPlaced() => TryAdvance(TutorialTrigger.BugsPlaced);
@@ -383,6 +440,19 @@ public class TutorialManager : MonoBehaviour
     public void OnCustomerServed() => TryAdvance(TutorialTrigger.CustomerServed);
     public void OnCantServeUsed() => TryAdvance(TutorialTrigger.CantServeUsed);
     public void OnRestockUsed() => TryAdvance(TutorialTrigger.RestockUsed);
+    public void OnCobwebBought() => TryAdvance(TutorialTrigger.CobwebBought);
+
+    public void OnBugAddedToCart()
+    {
+        if (!isActive) return;
+        if (steps[currentStep].trigger != TutorialTrigger.BugAddedToCart) return;
+        bugAddedCount++;
+        if (bugAddedCount >= 3)
+        {
+            bugAddedCount = 0;
+            TryAdvance(TutorialTrigger.BugAddedToCart);
+        }
+    }
 
     void TryAdvance(TutorialTrigger trigger)
     {
@@ -433,6 +503,12 @@ public class TutorialManager : MonoBehaviour
             screenPos = mainCamera.WorldToScreenPoint(target.position);
 
         arrowImage.rectTransform.position = screenPos + new Vector3(offset.x, offset.y, 0f);
+        arrowImage.rectTransform.rotation = Quaternion.Euler(0f, 0f, rotation);
+    }
+
+    void SetArrowFixed(Vector2 screenPosition, float rotation)
+    {
+        arrowImage.rectTransform.position = new Vector3(screenPosition.x, screenPosition.y, 0f);
         arrowImage.rectTransform.rotation = Quaternion.Euler(0f, 0f, rotation);
     }
 

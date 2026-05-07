@@ -7,7 +7,6 @@ public class CarrySystem : MonoBehaviour
 
     private Dictionary<BugType, List<BugToken>> carriedBugs
         = new Dictionary<BugType, List<BugToken>>();
-
     private int totalCarried = 0;
 
     public bool PickUp(BugToken token)
@@ -17,13 +16,11 @@ public class CarrySystem : MonoBehaviour
             Debug.Log("Carrying too much!");
             return false;
         }
-
         if (!carriedBugs.ContainsKey(token.bugType))
             carriedBugs[token.bugType] = new List<BugToken>();
-
         carriedBugs[token.bugType].Add(token);
         totalCarried++;
-        CarryDisplay.Instance.UpdateDisplay(carriedBugs);
+        CarryDisplay.Instance?.UpdateDisplay(carriedBugs);
         return true;
     }
 
@@ -31,23 +28,20 @@ public class CarrySystem : MonoBehaviour
     {
         if (!carriedBugs.ContainsKey(bugType)) return null;
         if (carriedBugs[bugType].Count == 0) return null;
-
         BugToken token = carriedBugs[bugType][0];
         carriedBugs[bugType].RemoveAt(0);
         totalCarried--;
-
         if (carriedBugs[bugType].Count == 0)
             carriedBugs.Remove(bugType);
-
-        CarryDisplay.Instance.UpdateDisplay(carriedBugs);
+        CarryDisplay.Instance?.UpdateDisplay(carriedBugs);
         return token;
     }
 
-    public void ClearAll() // ← added
+    public void ClearAll()
     {
         carriedBugs.Clear();
         totalCarried = 0;
-        CarryDisplay.Instance.UpdateDisplay(carriedBugs);
+        CarryDisplay.Instance?.UpdateDisplay(carriedBugs);
     }
 
     public int GetCountOfType(BugType bugType)
@@ -57,7 +51,6 @@ public class CarrySystem : MonoBehaviour
     }
 
     public BugToken TakeOneOfType(BugType bugType) => TakeOne(bugType);
-
     public int TotalCarried() => totalCarried;
     public bool IsFull() => totalCarried >= MAX_CARRY;
     public bool IsCarrying(BugType bugType) => carriedBugs.ContainsKey(bugType);

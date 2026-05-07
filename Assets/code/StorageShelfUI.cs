@@ -73,6 +73,7 @@ public class StorageShelfUI : MonoBehaviour
 
         UpdateGrid();
         UpdateSelectedCount();
+        TutorialManager.Instance?.OnStorageOpened();
     }
 
     public void CloseShelf()

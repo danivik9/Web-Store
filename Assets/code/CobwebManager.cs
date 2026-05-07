@@ -86,7 +86,6 @@ public class CobwebManager : MonoBehaviour, IInteractable
             return false;
         }
 
-        // Check if player can afford total order so far
         float totalCost = GetTotalCost() + currentCard.GetPrice(bugType);
         if (totalCost > GameManager.Instance.currentMoney)
         {
@@ -98,6 +97,7 @@ public class CobwebManager : MonoBehaviour, IInteractable
         CobwebUI.Instance.UpdateWebDisplay(pendingOrder);
         CobwebUI.Instance.UpdateStickyNote();
         CobwebUI.Instance.UpdateTotalCost(GetTotalCost());
+        TutorialManager.Instance?.OnBugAddedToCart();
         return true;
     }
 
@@ -111,7 +111,6 @@ public class CobwebManager : MonoBehaviour, IInteractable
         CobwebUI.Instance.UpdateTotalCost(GetTotalCost());
     }
 
-    // Only deducts money when player confirms
     public void CollectOrder()
     {
         float totalCost = GetTotalCost();

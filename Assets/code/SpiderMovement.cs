@@ -43,7 +43,7 @@ public class SpiderMovement : MonoBehaviour
         if (moveDirection.sqrMagnitude > 0.01f)
         {
             Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
-            Quaternion offset = Quaternion.Euler(-90f, 0f, 0f); // your correction
+            Quaternion offset = Quaternion.Euler(0f, 0f, 0f); // your correction
             rb.rotation = Quaternion.Slerp(
                 rb.rotation,
                 targetRotation * offset,

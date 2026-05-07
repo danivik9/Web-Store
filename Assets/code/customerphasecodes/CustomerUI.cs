@@ -55,6 +55,7 @@ public class CustomerUI : MonoBehaviour
     private int randomFilled = 0;
     private int currentRandomRollIndex = 0;
     private bool isRolling = false;
+    private bool isAtRegister = false;
 
     void Awake()
     {
@@ -80,6 +81,7 @@ public class CustomerUI : MonoBehaviour
 
     public void PanToRegister()
     {
+        isAtRegister = true;
         InteractionManager.IsLocked = true;
         UIManager.Instance.HidePrompt();
         spiderMovement.enabled = false;
@@ -97,6 +99,7 @@ public class CustomerUI : MonoBehaviour
 
     public void ReturnFromRegister()
     {
+        isAtRegister = false;
         InteractionManager.IsLocked = false;
         spiderObject.SetActive(true);
         spiderMovement.enabled = true;
@@ -165,7 +168,10 @@ public class CustomerUI : MonoBehaviour
                 else
                 {
                     btn.onClick.AddListener(() =>
-                        CustomerPhaseManager.Instance.SelectCustomer(captured));
+                    {
+                        if (!isAtRegister) return;
+                        CustomerPhaseManager.Instance.SelectCustomer(captured);
+                    });
                 }
             }
         }
