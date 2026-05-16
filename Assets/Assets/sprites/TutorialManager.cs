@@ -44,6 +44,7 @@ public class TutorialManager : MonoBehaviour
 
     [Header("Settings")]
     public float typewriterSpeed = 0.025f;
+    public float cantServeTextDelay = 2.5f;
 
     [Header("Arrow Bob")]
     public float arrowBobSpeed = 4f;
@@ -205,7 +206,7 @@ public class TutorialManager : MonoBehaviour
             // ── Cobweb Shop ───────────────────────── 8-10
             new TutorialStep(
                 "Welcome to the Cobweb Shop! Click a bug type button on the right to add it to your order.",
-                TutorialTrigger.BugAddedToCart, bugButtonsContainerTarget, 0f, -120f, 0f),
+                TutorialTrigger.BugAddedToCart, bugButtonsContainerTarget, 0f, -60f, 0f),
             new TutorialStep(
                 "Your bug appeared on the web! Added too many? Click a bug on the web to remove it.",
                 TutorialTrigger.Click, webItemsContainerTarget, -90f, 0f, 80f),
@@ -226,7 +227,7 @@ public class TutorialManager : MonoBehaviour
 
             // ── Stocking Shelves ──────────────────── 14-17
             new TutorialStep(
-                "Bugs are floating above your head! Head back to the store and press E on a shelf to place them. Each shelf only accepts one bug type!",
+                "Bugs are floating above your head! The arrows show you where to place them. Head to the marked shelves and press E to place your bugs!",
                 TutorialTrigger.BugsPlaced, storeShelfTarget, -90f, 0f, 80f),
             new TutorialStep(
                 "Nice stocking! Carrying the wrong bugs? Walk back to the Storage Shelf and press E to return them.",
@@ -235,12 +236,12 @@ public class TutorialManager : MonoBehaviour
                 "Watch expiry dates! Hover any bug to check. Expired bugs cost $1 each — Fruit Flies only last 1 day!",
                 TutorialTrigger.Click, null, -90f, 0f, 80f),
             new TutorialStep(
-                "Important: once the store is open the Cobweb Shop closes! Buy everything you need before opening the doors.",
+                "Important: make sure you are not carrying any bugs before opening the store — put them back in storage first! The Cobweb Shop also closes once the store opens.",
                 TutorialTrigger.Click, null, -90f, 0f, 80f),
 
             // ── Opening the Store ─────────────────── 18
             new TutorialStep(
-                "Shelves stocked? Walk to the Customer Door on the right and press E to open the store!",
+                "Shelves stocked and hands empty? Walk to the Customer Door on the right and press E to open the store!",
                 TutorialTrigger.DoorOpened, storeDoorTarget, -90f, 0f, 80f),
 
             // ── Customer Phase ────────────────────── 19-22
@@ -314,7 +315,6 @@ public class TutorialManager : MonoBehaviour
         if (index == CANT_SERVE_STEP)
             CustomerPhaseManager.Instance?.MoveUnservableCustomerToFront();
 
-        // ── Refresh button states at key steps ────
         if (index == CANT_SERVE_STEP || index == 27)
             CustomerUI.Instance?.RefreshButtonStates();
 
@@ -349,7 +349,11 @@ public class TutorialManager : MonoBehaviour
 
         clickToContinueButton.SetActive(false);
         StopAllCoroutines();
-        StartCoroutine(TypeText(step.text));
+
+        if (index == CANT_SERVE_STEP)
+            StartCoroutine(DelayedTypeText(step.text, cantServeTextDelay));
+        else
+            StartCoroutine(TypeText(step.text));
     }
 
     void Update()
@@ -525,5 +529,13 @@ public class TutorialManager : MonoBehaviour
         InteractionManager.IsLocked = false;
         if (waitingForClick)
             clickToContinueButton.SetActive(true);
+    }
+
+    IEnumerator DelayedTypeText(string text, float delay)
+    {
+        tutorialText.text = "";
+        clickToContinueButton.SetActive(false);
+        yield return new WaitForSeconds(delay);
+        StartCoroutine(TypeText(text));
     }
 }
