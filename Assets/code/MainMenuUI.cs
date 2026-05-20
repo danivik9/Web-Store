@@ -20,14 +20,16 @@ public class MainMenuUI : MonoBehaviour
     [Header("Intro Sequence")]
     public Animator spiderAnimator;
     public Transform spiderTransform;
-    public Transform walkTarget;           // empty GO inside the shop
+    public Transform walkTarget;
     public float walkSpeed = 2f;
-    public Transform door;                 // the door pivot
-    public float doorClosedAngle = -90f;   // Y rotation when closed
+    public float turnSpeed = 5f;
+    public Transform door;
+    public float doorClosedAngle = -90f;
     public float doorCloseSpeed = 3f;
+    public float doorStartDistance = 3f;
 
     [Header("Fade")]
-    public Image fadePanel;                // full-screen black Image, alpha 0
+    public Image fadePanel;
     public float fadeDuration = 1f;
 
     private bool isPlaying = false;
@@ -52,7 +54,6 @@ public class MainMenuUI : MonoBehaviour
         if (isPlaying) return;
         isPlaying = true;
 
-        // Disable buttons so player can't double-click
         playButton.interactable = false;
         settingsButton.interactable = false;
         quitButton.interactable = false;
@@ -65,20 +66,35 @@ public class MainMenuUI : MonoBehaviour
         // 1. Hide UI
         mainPanel.SetActive(false);
 
-        // 2. Trigger walk animation
-        if (spiderAnimator != null)
-            spiderAnimator.SetTrigger("EnterShop");
-
-        // 3. Walk spider toward the inside target
+        // 2. Walk spider toward the inside target
         if (spiderTransform != null && walkTarget != null)
         {
             Vector3 destination = walkTarget.position;
-            destination.y = spiderTransform.position.y; // keep same height
+            destination.y = spiderTransform.position.y;
 
-            // Rotate spider to face walk direction
+            // Smoothly rotate to face walk direction
             Vector3 dir = (destination - spiderTransform.position).normalized;
             if (dir != Vector3.zero)
-                spiderTransform.rotation = Quaternion.LookRotation(dir);
+            {
+                Quaternion targetRot = Quaternion.LookRotation(dir);
+                while (Quaternion.Angle(spiderTransform.rotation, targetRot) > 1f)
+                {
+                    spiderTransform.rotation = Quaternion.Slerp(
+                        spiderTransform.rotation,
+                        targetRot,
+                        turnSpeed * Time.deltaTime
+                    );
+                    yield return null;
+                }
+                spiderTransform.rotation = targetRot;
+            }
+
+            // 3. Trigger walk animation after turning
+            if (spiderAnimator != null)
+                spiderAnimator.SetTrigger("EnterShop");
+
+            // 4. Walk forward, start door closing when close enough
+            bool doorStarted = false;
 
             while (Vector3.Distance(spiderTransform.position, destination) > 0.1f)
             {
@@ -87,24 +103,20 @@ public class MainMenuUI : MonoBehaviour
                     destination,
                     walkSpeed * Time.deltaTime
                 );
-                yield return null;
-            }
-        }
 
-        // 4. Close the door
-        if (door != null)
-        {
-            Quaternion targetRot = Quaternion.Euler(0f, doorClosedAngle, 0f);
-            while (Quaternion.Angle(door.rotation, targetRot) > 1f)
-            {
-                door.rotation = Quaternion.Slerp(
-                    door.rotation,
-                    targetRot,
-                    doorCloseSpeed * Time.deltaTime
-                );
+                if (!doorStarted && door != null &&
+                    Vector3.Distance(spiderTransform.position, destination) < doorStartDistance)
+                {
+                    doorStarted = true;
+                    StartCoroutine(CloseDoor());
+                }
+
                 yield return null;
             }
-            door.rotation = targetRot;
+
+            // Make sure door finishes closing if it never started
+            if (!doorStarted && door != null)
+                yield return StartCoroutine(CloseDoor());
         }
 
         // 5. Short pause after door closes
@@ -127,6 +139,23 @@ public class MainMenuUI : MonoBehaviour
         // 7. Load game scene
         yield return new WaitForSeconds(0.2f);
         SceneManager.LoadScene(gameSceneName);
+    }
+
+    // ── Door ───────────────────────────────────────
+
+    IEnumerator CloseDoor()
+    {
+        Quaternion targetRot = Quaternion.Euler(0f, doorClosedAngle, 0f);
+        while (Quaternion.Angle(door.rotation, targetRot) > 1f)
+        {
+            door.rotation = Quaternion.Slerp(
+                door.rotation,
+                targetRot,
+                doorCloseSpeed * Time.deltaTime
+            );
+            yield return null;
+        }
+        door.rotation = targetRot;
     }
 
     // ── Settings ───────────────────────────────────
