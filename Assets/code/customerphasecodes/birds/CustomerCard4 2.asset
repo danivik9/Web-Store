@@ -20,8 +20,11 @@ MonoBehaviour:
   diceTable:
   - minRoll: 2
     maxRoll: 5
-    bugType: {fileID: 11400000, guid: acc2f137713a54d4a9913791eaa69e44, type: 2}
+    bugType: {fileID: 11400000, guid: d9a263b3b9d838541981608bd3c1b563, type: 2}
   - minRoll: 6
+    maxRoll: 8
+    bugType: {fileID: 11400000, guid: d1c81cf2530e69146bb9d3c72f43e86f, type: 2}
+  - minRoll: 9
     maxRoll: 12
-    bugType: {fileID: 11400000, guid: 90e967b140a734e41a26634ab274a5ba, type: 2}
-  penalty: 9
+    bugType: {fileID: 11400000, guid: 0a76e0056cff7044ab1fdb4f179c66ed, type: 2}
+  penalty: 4
