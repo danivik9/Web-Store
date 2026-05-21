@@ -44,7 +44,6 @@ public class CustomerPhaseManager : MonoBehaviour
 
         customerQueue.Clear();
 
-        // ── Round 0 uses fixed tutorial cards in order ──
         if (GameManager.Instance.isRound0)
         {
             foreach (CustomerCard card in tutorialCards)
@@ -54,7 +53,6 @@ public class CustomerPhaseManager : MonoBehaviour
         }
         else
         {
-            // Fisher-Yates shuffle for normal rounds
             List<CustomerCard> shuffled = new List<CustomerCard>(allCards);
             for (int i = shuffled.Count - 1; i > 0; i--)
             {
@@ -109,9 +107,17 @@ public class CustomerPhaseManager : MonoBehaviour
 
         hasRestockedThisRound = true;
         CustomerSpawner.Instance.DespawnCustomer(removed);
-        CustomerUI.Instance.ShowQueue(customerQueue);
 
         TutorialManager.Instance?.OnRestockUsed();
+
+        // ── End phase if no customers left ─────────
+        if (customerQueue.Count == 0)
+        {
+            EndCustomerPhase();
+            return true;
+        }
+
+        CustomerUI.Instance.ShowQueue(customerQueue);
         return true;
     }
 
@@ -119,6 +125,12 @@ public class CustomerPhaseManager : MonoBehaviour
 
     public void SelectCustomer(CustomerCard card)
     {
+        if (TutorialManager.Instance != null && !TutorialManager.Instance.IsCustomerSelectionAllowed())
+        {
+            UIManager.Instance.ShowTimedPrompt("Restock from storage first!");
+            return;
+        }
+
         activeCustomer = card;
         itemsPlacedForCurrentCustomer.Clear();
         CustomerSpawner.Instance.MoveCustomerToRegister(card);
@@ -209,13 +221,9 @@ public class CustomerPhaseManager : MonoBehaviour
         storeOpen = false;
         CustomerUI.Instance.CloseQueue();
 
-        // ── Round 0: tutorial handles ending ──────
         if (GameManager.Instance.isRound0)
             return;
 
-        // Do NOT DespawnAll here — customers still need to be visible during the
-        // Day Breakdown screen. DayBreakdownUI.OnContinue handles WalkAllOut
-        // (customers walk to door during fade) then DespawnAll (force-clears).
         GameManager.Instance.StartPhase(GamePhase.Breakdown);
         DayBreakdownUI.Instance.ShowBreakdown(
             customersServed,
@@ -231,7 +239,6 @@ public class CustomerPhaseManager : MonoBehaviour
     {
         if (customerQueue.Count == 0) return;
 
-        // During Round 0 Rex is always index 2 — no need to search
         if (GameManager.Instance.isRound0)
         {
             Debug.Log("Tutorial: Rex is already in position, no reordering needed.");
@@ -240,7 +247,6 @@ public class CustomerPhaseManager : MonoBehaviour
 
         CustomerCard target = null;
 
-        // Priority 1: partial stock
         foreach (CustomerCard card in customerQueue)
         {
             int shelfCount = GetShelfCount(card.guaranteedBugType);
@@ -251,7 +257,6 @@ public class CustomerPhaseManager : MonoBehaviour
             }
         }
 
-        // Priority 2: completely out of stock
         if (target == null)
         {
             foreach (CustomerCard card in customerQueue)

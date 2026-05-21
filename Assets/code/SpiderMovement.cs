@@ -6,12 +6,17 @@ public class SpiderMovement : MonoBehaviour
     public float moveSpeed = 5f;
     public float rotationSpeed = 10f;
 
+    [Header("Animation")]
+    public Animator animator;
+
     private Rigidbody rb;
     private Vector3 moveDirection;
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
+        if (animator == null)
+            animator = GetComponentInChildren<Animator>();
     }
 
     void Update()
@@ -32,6 +37,10 @@ public class SpiderMovement : MonoBehaviour
         camRight.Normalize();
 
         moveDirection = (camForward * vertical + camRight * horizontal).normalized;
+
+        // Update animation
+        if (animator != null)
+            animator.SetBool("IsWalking", moveDirection.sqrMagnitude > 0.01f);
     }
 
     void FixedUpdate()

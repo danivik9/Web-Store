@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 632547174a3b11340a13d6d0e124664f, type: 3}
   m_Name: CustomerCard3
   m_EditorClassIdentifier: 
-  customerName: Headhog
+  customerName: Spike
   customerPrefab: {fileID: 7616598668515326824, guid: cc6be4b306b9ca649a76bb19e1958a94, type: 3}
   guaranteedBugType: {fileID: 11400000, guid: d1c81cf2530e69146bb9d3c72f43e86f, type: 2}
   guaranteedAmount: 2

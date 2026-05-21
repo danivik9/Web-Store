@@ -187,14 +187,8 @@ public class CustomerUI : MonoBehaviour
             }
         }
 
-        bool canRestock = !CustomerPhaseManager.Instance.hasRestockedThisRound
-            && queue.Count > 0
-            && StorageInventory.Instance.GetCount() > 0
-            && (TutorialManager.Instance == null || TutorialManager.Instance.IsRestockAllowed());
-        restockButton.interactable = canRestock;
-        restockButtonText.text = CustomerPhaseManager.Instance.hasRestockedThisRound
-            ? "Restocked"
-            : "Restock (lose 1 customer)";
+        restockButton.interactable = true;
+        UpdateRestockVisual();
     }
 
     public void CloseQueue()
@@ -207,17 +201,12 @@ public class CustomerUI : MonoBehaviour
 
     public void RefreshButtonStates()
     {
-        // ── Restock ────────────────────────────────
         if (restockButton.gameObject.activeSelf)
         {
-            bool canRestock = !CustomerPhaseManager.Instance.hasRestockedThisRound
-                && CustomerPhaseManager.Instance.GetQueue().Count > 0
-                && StorageInventory.Instance.GetCount() > 0
-                && (TutorialManager.Instance == null || TutorialManager.Instance.IsRestockAllowed());
-            restockButton.interactable = canRestock;
+            restockButton.interactable = true;
+            UpdateRestockVisual();
         }
 
-        // ── Can't Serve dimming ────────────────────
         if (cantServeButton.gameObject.activeSelf)
         {
             bool cantServeAllowed = TutorialManager.Instance == null
@@ -227,6 +216,25 @@ public class CustomerUI : MonoBehaviour
                 img.color = new Color(img.color.r, img.color.g, img.color.b,
                     cantServeAllowed ? 1f : 0.35f);
         }
+    }
+
+    // ── Restock Visual ─────────────────────────────
+
+    void UpdateRestockVisual()
+    {
+        bool canRestock = !CustomerPhaseManager.Instance.hasRestockedThisRound
+            && CustomerPhaseManager.Instance.GetQueue().Count > 0
+            && StorageInventory.Instance.GetCount() > 0
+            && !CustomerPhaseManager.Instance.HasActiveCustomer()
+            && (TutorialManager.Instance == null || TutorialManager.Instance.IsRestockAllowed());
+
+        var img = restockButton.GetComponent<Image>();
+        if (img != null)
+            img.color = new Color(img.color.r, img.color.g, img.color.b, canRestock ? 1f : 0.4f);
+
+        restockButtonText.text = CustomerPhaseManager.Instance.hasRestockedThisRound
+            ? "Restocked"
+            : "Restock (lose 1 customer)";
     }
 
     // ── Order Panel ────────────────────────────────
@@ -252,7 +260,6 @@ public class CustomerUI : MonoBehaviour
         BuildHiddenSlots(card.randomRollCount);
         UpdateStockStickyNote();
 
-        // ── Apply button states on open ────────────
         RefreshButtonStates();
     }
 
@@ -364,6 +371,8 @@ public class CustomerUI : MonoBehaviour
 
             if (guaranteedFilled >= currentCard.guaranteedAmount)
             {
+                TutorialManager.Instance?.OnGuaranteedFilled();
+
                 if (currentCard.randomRollCount > 0)
                 {
                     rollDiceButton.gameObject.SetActive(true);
@@ -375,9 +384,14 @@ public class CustomerUI : MonoBehaviour
                     CustomerPhaseManager.Instance.CompleteCustomer();
                 }
             }
+            else if (GetShelfStock(bugType) == 0)
+            {
+                TutorialManager.Instance?.OnGuaranteedFilled();
+            }
         }
         else
         {
+            TutorialManager.Instance?.OnGuaranteedFilled();
             StartCoroutine(FlashSlotRed(slot));
         }
     }
@@ -492,6 +506,27 @@ public class CustomerUI : MonoBehaviour
 
     void OnRestock()
     {
+        if (CustomerPhaseManager.Instance.HasActiveCustomer())
+        {
+            UIManager.Instance.ShowTimedPrompt("Can't restock while serving a customer!");
+            return;
+        }
+        if (CustomerPhaseManager.Instance.hasRestockedThisRound)
+        {
+            UIManager.Instance.ShowTimedPrompt("Already restocked this round!");
+            return;
+        }
+        if (StorageInventory.Instance.GetCount() == 0)
+        {
+            UIManager.Instance.ShowTimedPrompt("Storage is empty, can't restock!");
+            return;
+        }
+        if (CustomerPhaseManager.Instance.GetQueue().Count == 0)
+        {
+            UIManager.Instance.ShowTimedPrompt("No customers left!");
+            return;
+        }
+
         bool success = CustomerPhaseManager.Instance.TryRestock();
         if (success)
             CloseQueue();
@@ -518,6 +553,15 @@ public class CustomerUI : MonoBehaviour
     }
 
     // ── Helpers ────────────────────────────────────
+
+    int GetShelfStock(BugType bugType)
+    {
+        Shelf[] shelves = FindObjectsOfType<Shelf>();
+        foreach (Shelf shelf in shelves)
+            if (shelf.acceptedBugType == bugType)
+                return shelf.GetOccupiedCount();
+        return 0;
+    }
 
     IEnumerator FlashSlotRed(GameObject slot)
     {

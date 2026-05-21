@@ -9,12 +9,12 @@ public class FadeManager : MonoBehaviour
     [Header("Fade")]
     public Image fadePanel;
     public float fadeDuration = 1f;
-    public float holdDuration = 0.8f; // ← hold on black before fading back in
+    public float holdDuration = 0.8f;
 
     void Awake()
     {
         Instance = this;
-        fadePanel.color = new Color(0, 0, 0, 0);
+        fadePanel.color = new Color(0, 0, 0, 1); // ← start black
     }
 
     public void FadeToBlack(System.Action onComplete = null)
@@ -42,7 +42,6 @@ public class FadeManager : MonoBehaviour
 
         fadePanel.color = new Color(0, 0, 0, to);
 
-        // Hold on black to give time for scene to reset
         if (to == 1f && holdDuration > 0)
             yield return new WaitForSeconds(holdDuration);
 

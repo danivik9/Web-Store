@@ -45,6 +45,8 @@ public class GameManager : MonoBehaviour
         CobwebManager.Instance.ShuffleDeck();
         CobwebManager.Instance.DrawNextCard();
         StartPhase(GamePhase.Preparation);
+
+        FadeManager.Instance.FadeFromBlack(); // ← fade in when game starts
     }
 
     // ── Phase Control ──────────────────────────────
@@ -79,7 +81,6 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log($"Round {currentRound} — Preparation Phase");
 
-        // ── Stock shelves at start of Round 1 only ──
         if (currentRound == 1 && !isRound0)
             StockStartingShelves();
 
@@ -108,9 +109,6 @@ public class GameManager : MonoBehaviour
     void StockStartingShelves()
     {
         BugType[] bugs = CobwebManager.Instance.GetAllBugTypes();
-        // 0=FruitFly  1=Ant  2=Mosquito  3=Maggot  4=Moth
-        // Each shelf gets 4 of its bug type — shelves have 5 slots max
-        // so this leaves 1 slot free for the player to add to
 
         int[] amounts = { 4, 4, 4, 4, 4 };
 
@@ -154,25 +152,20 @@ public class GameManager : MonoBehaviour
         if (!isRound0) return;
         isRound0 = false;
 
-        // Clear all shelves
         Shelf[] shelves = FindObjectsOfType<Shelf>();
         foreach (Shelf shelf in shelves)
             foreach (ShelfSlot slot in shelf.slots)
                 slot.ClearSlot();
 
-        // Clear storage and carry
         StorageInventory.Instance.ClearAll();
         CarrySystem carry = FindObjectOfType<CarrySystem>();
         if (carry != null) carry.ClearAll();
 
-        // ── Reset spider to starting position ──────
         DayBreakdownUI.Instance.ResetSpiderPublic();
 
-        // Re-enable spider
         SpiderMovement spider = FindObjectOfType<SpiderMovement>();
         if (spider != null) spider.enabled = true;
 
-        // Reset to real game state
         currentRound = 1;
         currentMoney = 15f;
         pendingEarnings = 0f;

@@ -94,7 +94,7 @@ public class CustomerSpawner : MonoBehaviour
         });
     }
 
-    public void WalkAllOut() // ← new method
+    public void WalkAllOut()
     {
         foreach (Customer c in activeCustomers)
         {

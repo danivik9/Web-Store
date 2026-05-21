@@ -9,6 +9,7 @@ public class Customer : MonoBehaviour
     private NavMeshAgent agent;
     private CustomerCard assignedCard;
     private int waitingSpotIndex;
+    private Animator animator;
 
     public CustomerCard AssignedCard => assignedCard;
     public int WaitingSpotIndex => waitingSpotIndex;
@@ -16,6 +17,7 @@ public class Customer : MonoBehaviour
     void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
+        animator = GetComponentInChildren<Animator>();
         if (agent != null) agent.speed = moveSpeed;
     }
 
@@ -33,6 +35,10 @@ public class Customer : MonoBehaviour
 
     IEnumerator MoveCoroutine(Vector3 destination, System.Action onArrived)
     {
+        // Start walk animation
+        if (animator != null)
+            animator.SetBool("IsWalking", true);
+
         if (agent != null)
         {
             agent.SetDestination(destination);
@@ -63,6 +69,11 @@ public class Customer : MonoBehaviour
         }
 
         transform.position = destination;
+
+        // Stop walk animation
+        if (animator != null)
+            animator.SetBool("IsWalking", false);
+
         onArrived?.Invoke();
     }
 }

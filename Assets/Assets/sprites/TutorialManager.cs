@@ -9,7 +9,7 @@ public class TutorialManager : MonoBehaviour
     public static TutorialManager Instance;
 
     const string PREFS_KEY = "TutorialComplete";
-    const int CANT_SERVE_STEP = 25;
+    const int CANT_SERVE_STEP = 26;
 
     // ── UI ─────────────────────────────────────────
     [Header("UI")]
@@ -44,7 +44,6 @@ public class TutorialManager : MonoBehaviour
 
     [Header("Settings")]
     public float typewriterSpeed = 0.025f;
-    public float cantServeTextDelay = 2.5f;
 
     [Header("Arrow Bob")]
     public float arrowBobSpeed = 4f;
@@ -76,7 +75,8 @@ public class TutorialManager : MonoBehaviour
         CustomerCalled,
         CustomerServed,
         CantServeUsed,
-        RestockUsed
+        RestockUsed,
+        GuaranteedFilled
     }
 
     struct TutorialStep
@@ -186,76 +186,76 @@ public class TutorialManager : MonoBehaviour
                 "Each day has 3 phases. Let's go through them!",
                 TutorialTrigger.Click, null, -90f, 0f, 80f),
             new TutorialStep(
-                "Phase 1: Preparation - buy bugs from the Cobweb Shop and stock your shelves.",
+                "Phase 1: Preparation. Buy bugs and stock your shelves.",
                 TutorialTrigger.Click, null, -90f, 0f, 80f),
             new TutorialStep(
-                "Phase 2: Customer - open the store and serve customers at the register.",
+                "Phase 2: Customer. Open the store and serve customers.",
                 TutorialTrigger.Click, null, -90f, 0f, 80f),
             new TutorialStep(
-                "Phase 3: Breakdown - see how the day went and what expired overnight.",
+                "Phase 3: Breakdown. See how the day went.",
                 TutorialTrigger.Click, null, -90f, 0f, 80f),
 
             // ── Storage Room ──────────────────────── 6-7
             new TutorialStep(
-                "Let's start! Head to the Storage Room through the door on the left - that's where you buy and store your inventory!",
+                "Let's start! Head to the Storage Room through the door on the left.",
                 TutorialTrigger.StorageEntered, storageDoorTarget, 180f, 80f, 0f),
             new TutorialStep(
-                "This is the Storage Room! The Cobweb Shop is in the top right corner. Press E on the cobweb to open the shop!",
+                "This is the Storage Room! Press E on the cobweb to open the shop.",
                 TutorialTrigger.CobwebOpened, cobwebTarget, -90f, 0f, 80f),
 
             // ── Cobweb Shop ───────────────────────── 8-10
             new TutorialStep(
-                "Welcome to the Cobweb Shop! Click a bug type button on the right to add it to your order.",
-                TutorialTrigger.BugAddedToCart, bugButtonsContainerTarget, 0f, -60f, 0f),
+                "Welcome to the Cobweb Shop! Click a bug button to add it to your order.",
+                TutorialTrigger.BugAddedToCart, bugButtonsContainerTarget, 0f, -120f, 0f),
             new TutorialStep(
-                "Your bug appeared on the web! Added too many? Click a bug on the web to remove it.",
+                "Your bug appeared on the web! Click a bug on the web to remove it.",
                 TutorialTrigger.Click, webItemsContainerTarget, -90f, 0f, 80f),
             new TutorialStep(
-                "Happy with your order? Hit Collect to buy everything on the web!",
+                "Happy with your order? Hit Collect to buy everything!",
                 TutorialTrigger.CobwebBought, collectButtonTarget, -90f, 0f, 80f),
 
             // ── Storage Shelf ─────────────────────── 11-13
             new TutorialStep(
-                "Great purchase! Now head to the Storage Shelf on the left wall and press E to open it.",
+                "Great purchase! Head to the Storage Shelf on the left and press E.",
                 TutorialTrigger.StorageOpened, storageShelfTarget, 0f, -100f, 0f),
             new TutorialStep(
-                "This is your Storage Shelf! Each bug shows how many days until it expires. Hover over any bug to see details!",
+                "This is your Storage Shelf! Hover over any bug to see its expiry date.",
                 TutorialTrigger.Click, 90f, 960f, 400f),
             new TutorialStep(
-                "Click bugs to select them - up to 5 at a time. Then hit Carry to pick them up!",
+                "Click bugs to select them, up to 5 at a time. Then hit Carry!",
                 TutorialTrigger.BugsCarried, carryButtonTarget, -90f, 0f, 80f),
 
             // ── Stocking Shelves ──────────────────── 14-17
             new TutorialStep(
-                "Bugs are floating above your head! The arrows show you where to place them. Head to the marked shelves and press E to place your bugs!",
+                "Bugs are above your head! Press E on a shelf to place them.",
                 TutorialTrigger.BugsPlaced, storeShelfTarget, -90f, 0f, 80f),
             new TutorialStep(
-                "Nice stocking! Carrying the wrong bugs? Walk back to the Storage Shelf and press E to return them.",
+                "Nice stocking! Wrong bugs? Press E on the Storage Shelf to return them.",
                 TutorialTrigger.Click, null, -90f, 0f, 80f),
             new TutorialStep(
-                "Watch expiry dates! Hover any bug to check. Expired bugs cost $1 each — Fruit Flies only last 1 day!",
+                "Watch expiry dates! Expired bugs cost $1 each. Fruit Flies last 1 day!",
                 TutorialTrigger.Click, null, -90f, 0f, 80f),
             new TutorialStep(
-                "Important: make sure you are not carrying any bugs before opening the store — put them back in storage first! The Cobweb Shop also closes once the store opens.",
+                "The Cobweb Shop closes once the store opens. Buy everything first!",
                 TutorialTrigger.Click, null, -90f, 0f, 80f),
 
             // ── Opening the Store ─────────────────── 18
             new TutorialStep(
-                "Shelves stocked and hands empty? Walk to the Customer Door on the right and press E to open the store!",
+                "Shelves stocked? Walk to the Customer Door and press E to open!",
                 TutorialTrigger.DoorOpened, storeDoorTarget, -90f, 0f, 80f),
 
             // ── Customer Phase ────────────────────── 19-22
             new TutorialStep(
-                "Customers are coming in! Walk to the Register and press E to start serving.",
+                "Customers are coming in! Walk to the Register and press E.",
                 TutorialTrigger.RegisterOpened, registerTarget, -90f, 0f, 80f),
             new TutorialStep(
-                "This is the customer queue! Each card shows the customer and what they want. Click a card to call them!",
+                "This is the queue! Click a customer card to call them up.",
                 TutorialTrigger.CustomerCalled, queueContainerTarget, 90f, 0f, -110f),
             new TutorialStep(
-                "See the guaranteed item slots? Click them to place that bug from your shelves onto the counter!",
+                "Click the guaranteed slots to place bugs from your shelves!",
                 TutorialTrigger.Click, guaranteedSlotsContainerTarget, -90f, 0f, 80f),
             new TutorialStep(
-                "All guaranteed slots filled! Roll the dice to reveal mystery items — then click the slot to fill it!",
+                "All guaranteed slots filled! Roll the dice to reveal mystery items!",
                 TutorialTrigger.CustomerServed, rollDiceButtonTarget, 0f, -150f, 0f),
 
             // ── Second Customer ───────────────────── 23
@@ -268,27 +268,34 @@ public class TutorialManager : MonoBehaviour
                 "Now click the next customer card to call them to the register.",
                 TutorialTrigger.CustomerCalled, queueContainerTarget, 90f, 0f, -110f),
 
-            // ── Can't Serve ───────────────────────── 25
+            // ── Fill Guaranteed First ─────────────── 25
             new TutorialStep(
-                "Hmm, looks like you can't fill this order. Place what you can — then hit Can't Serve!",
+                "Fill the guaranteed slots for this customer first!",
+                TutorialTrigger.GuaranteedFilled, guaranteedSlotsContainerTarget, -90f, 0f, 80f),
+
+            // ── Can't Serve ───────────────────────── 26
+            new TutorialStep(
+                "Hmm, seems like you can't finish this order. Hit Can't Serve!",
                 TutorialTrigger.CantServeUsed, cantServeButtonTarget, 180f, 150f, 0f),
+
+            // ── After Can't Serve ─────────────────── 27
             new TutorialStep(
-                "Any bugs you already placed are lost and you take a penalty! Plan ahead and stock up before opening.",
+                "Bugs you placed are lost and you take a penalty! Plan ahead next time.",
                 TutorialTrigger.Click, null, -90f, 0f, 80f),
 
-            // ── Restock ───────────────────────────── 27
+            // ── Restock ───────────────────────────── 28
             new TutorialStep(
-                "Low on stock? Restock from storage mid-round — but it costs you one customer!",
+                "Low on stock? Restock from storage, but it costs you one customer!",
                 TutorialTrigger.RestockUsed, restockButtonTarget, -90f, 0f, 110f),
 
-            // ── Final Customer ────────────────────── 28
+            // ── Final Customer ────────────────────── 29
             new TutorialStep(
-                "Good thinking! Now serve the remaining customer to wrap up the tutorial.",
+                "Good thinking! Now serve the remaining customer to finish up.",
                 TutorialTrigger.CustomerServed, null, -90f, 0f, 80f),
 
-            // ── End ───────────────────────────────── 29
+            // ── End ───────────────────────────────── 30
             new TutorialStep(
-                "Amazing! You're a natural shopkeeper. The real game starts now - 6 days, $200 goal, and the bank is watching. Good luck!",
+                "Amazing! You're a natural shopkeeper. The real game starts now. Good luck!",
                 TutorialTrigger.Click, null, -90f, 0f, 80f),
         };
     }
@@ -315,7 +322,7 @@ public class TutorialManager : MonoBehaviour
         if (index == CANT_SERVE_STEP)
             CustomerPhaseManager.Instance?.MoveUnservableCustomerToFront();
 
-        if (index == CANT_SERVE_STEP || index == 27)
+        if (index == CANT_SERVE_STEP || index == 28)
             CustomerUI.Instance?.RefreshButtonStates();
 
         TutorialStep step = steps[index];
@@ -349,11 +356,7 @@ public class TutorialManager : MonoBehaviour
 
         clickToContinueButton.SetActive(false);
         StopAllCoroutines();
-
-        if (index == CANT_SERVE_STEP)
-            StartCoroutine(DelayedTypeText(step.text, cantServeTextDelay));
-        else
-            StartCoroutine(TypeText(step.text));
+        StartCoroutine(TypeText(step.text));
     }
 
     void Update()
@@ -415,10 +418,13 @@ public class TutorialManager : MonoBehaviour
     }
 
     // ── Public Helpers ─────────────────────────────
+    // ── Public Helpers ─────────────────────────────
 
+    public bool IsTutorialActive() => isActive;
     public bool IsDoorStepReached() => !isActive || currentStep >= 18;
     public bool IsCantServeAllowed() => !isActive || currentStep >= CANT_SERVE_STEP;
-    public bool IsRestockAllowed() => !isActive || currentStep >= 27;
+    public bool IsRestockAllowed() => !isActive || currentStep >= 28;
+    public bool IsCustomerSelectionAllowed() => !isActive || currentStep != 28;
 
     // ── Trigger Hooks ──────────────────────────────
 
@@ -434,6 +440,7 @@ public class TutorialManager : MonoBehaviour
     public void OnCantServeUsed() => TryAdvance(TutorialTrigger.CantServeUsed);
     public void OnRestockUsed() => TryAdvance(TutorialTrigger.RestockUsed);
     public void OnCobwebBought() => TryAdvance(TutorialTrigger.CobwebBought);
+    public void OnGuaranteedFilled() => TryAdvance(TutorialTrigger.GuaranteedFilled);
 
     public void OnBugAddedToCart()
     {
@@ -529,13 +536,5 @@ public class TutorialManager : MonoBehaviour
         InteractionManager.IsLocked = false;
         if (waitingForClick)
             clickToContinueButton.SetActive(true);
-    }
-
-    IEnumerator DelayedTypeText(string text, float delay)
-    {
-        tutorialText.text = "";
-        clickToContinueButton.SetActive(false);
-        yield return new WaitForSeconds(delay);
-        StartCoroutine(TypeText(text));
     }
 }

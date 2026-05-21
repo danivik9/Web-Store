@@ -2,15 +2,19 @@
 
 public class CustomerDoor : MonoBehaviour, IInteractable
 {
+    public DoorAnimator doorAnimator;
+
+    public static CustomerDoor Instance;
+
+    void Awake()
+    {
+        Instance = this;
+    }
+
     public string GetPromptText()
     {
         if (GameManager.Instance.currentPhase != GamePhase.Preparation)
             return "Store is already open";
-
-        CarrySystem carry = FindObjectOfType<CarrySystem>();
-        if (carry != null && carry.TotalCarried() > 0)
-            return "Put your bugs away first!";
-
         return "Press E to open store for customers";
     }
 
@@ -18,15 +22,6 @@ public class CustomerDoor : MonoBehaviour, IInteractable
     {
         if (GameManager.Instance.currentPhase != GamePhase.Preparation) return;
 
-        // ── Block if carrying bugs ─────────────────
-        CarrySystem carry = FindObjectOfType<CarrySystem>();
-        if (carry != null && carry.TotalCarried() > 0)
-        {
-            UIManager.Instance.ShowPrompt("Put your bugs away first!");
-            return;
-        }
-
-        // ── During tutorial block door until step 18 is reached ──
         if (GameManager.Instance.isRound0 &&
             TutorialManager.Instance != null &&
             !TutorialManager.Instance.IsDoorStepReached())
@@ -35,8 +30,17 @@ public class CustomerDoor : MonoBehaviour, IInteractable
             return;
         }
 
+        if (doorAnimator != null)
+            doorAnimator.Open(false);
+
         GameManager.Instance.AdvancePhase();
         CustomerPhaseManager.Instance.OpenStore();
         TutorialManager.Instance?.OnDoorOpened();
+    }
+
+    public void CloseDoor()
+    {
+        if (doorAnimator != null)
+            doorAnimator.ForceClose();
     }
 }

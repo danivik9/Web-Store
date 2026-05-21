@@ -140,6 +140,7 @@ public class DayBreakdownUI : MonoBehaviour
         {
             GameManager.Instance.ApplyPendingMoney();
             CustomerSpawner.Instance.DespawnAll();
+            CustomerDoor.Instance?.CloseDoor();
             GameManager.Instance.AdvancePhase();
 
             if (!GameManager.Instance.IsGameEnded())
