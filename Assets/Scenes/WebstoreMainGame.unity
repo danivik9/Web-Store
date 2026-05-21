@@ -21627,33 +21627,6 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 4579454407841743219, guid: b1499ad56fa28a648b80c3252fee6066, type: 3}
---- !u!1 &2001367800 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 6335233927033768130, guid: a4db0dd169d89a34aaa281a0aca630d9, type: 3}
-  m_PrefabInstance: {fileID: 1196573126703123013}
-  m_PrefabAsset: {fileID: 0}
---- !u!64 &2001367804
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2001367800}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 4493585093827132993, guid: 57ef619ab5667bb45a9074aaaa4befb3, type: 3}
 --- !u!1001 &2003718278
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -24033,10 +24006,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 6335233927033768130, guid: a4db0dd169d89a34aaa281a0aca630d9, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 2001367804}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a4db0dd169d89a34aaa281a0aca630d9, type: 3}
 --- !u!4 &1196573126703123014 stripped
 Transform:
@@ -26398,7 +26368,7 @@ MeshCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 5
-  m_Convex: 1
+  m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -4807534039617588944, guid: 1b34c8e1561f6544baa09f850c6bcfb2, type: 3}
 --- !u!4 &7821083367552901449
@@ -26800,7 +26770,7 @@ MeshCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 5
-  m_Convex: 1
+  m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 2067516167187849954, guid: 5a0402991a16ac34f99b32b3e1b7bf0f, type: 3}
 --- !u!33 &8647101569314576348
