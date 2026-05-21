@@ -16,21 +16,21 @@ MonoBehaviour:
   customerPrefab: {fileID: 8968873901318535378, guid: e4f4ba048a9ab714e99efda773fa1af6, type: 3}
   guaranteedBugType: {fileID: 11400000, guid: d9a263b3b9d838541981608bd3c1b563, type: 2}
   guaranteedAmount: 1
-  randomRollCount: 2
+  randomRollCount: 1
   diceTable:
-  - minRoll: 1
-    maxRoll: 3
-    bugType: {fileID: 11400000, guid: d1c81cf2530e69146bb9d3c72f43e86f, type: 2}
-  - minRoll: 4
-    maxRoll: 6
-    bugType: {fileID: 11400000, guid: 90e967b140a734e41a26634ab274a5ba, type: 2}
-  - minRoll: 7
-    maxRoll: 8
+  - minRoll: 2
+    maxRoll: 4
+    bugType: {fileID: 11400000, guid: d9a263b3b9d838541981608bd3c1b563, type: 2}
+  - minRoll: 5
+    maxRoll: 5
     bugType: {fileID: 11400000, guid: 0a76e0056cff7044ab1fdb4f179c66ed, type: 2}
-  - minRoll: 9
+  - minRoll: 6
+    maxRoll: 7
+    bugType: {fileID: 11400000, guid: 90e967b140a734e41a26634ab274a5ba, type: 2}
+  - minRoll: 8
     maxRoll: 9
-    bugType: {fileID: 11400000, guid: acc2f137713a54d4a9913791eaa69e44, type: 2}
+    bugType: {fileID: 11400000, guid: d1c81cf2530e69146bb9d3c72f43e86f, type: 2}
   - minRoll: 10
     maxRoll: 12
-    bugType: {fileID: 11400000, guid: d9a263b3b9d838541981608bd3c1b563, type: 2}
-  penalty: 10
+    bugType: {fileID: 11400000, guid: acc2f137713a54d4a9913791eaa69e44, type: 2}
+  penalty: 8
