@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 632547174a3b11340a13d6d0e124664f, type: 3}
   m_Name: TutorialCustomer_ 4
   m_EditorClassIdentifier: 
-  customerName: hedgehog
-  customerPrefab: {fileID: 7616598668515326824, guid: cc6be4b306b9ca649a76bb19e1958a94, type: 3}
+  customerName: Fern
+  customerPrefab: {fileID: 3191352101596424591, guid: 647b78f232c260947aa93ca3345795b6, type: 3}
   guaranteedBugType: {fileID: 11400000, guid: d9a263b3b9d838541981608bd3c1b563, type: 2}
   guaranteedAmount: 2
   randomRollCount: 0

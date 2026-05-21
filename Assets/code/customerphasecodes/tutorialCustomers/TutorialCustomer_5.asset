@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 632547174a3b11340a13d6d0e124664f, type: 3}
   m_Name: TutorialCustomer_5
   m_EditorClassIdentifier: 
-  customerName: mouse
-  customerPrefab: {fileID: 7387320819559370606, guid: 03ab9d48d204db44cbad9b344a3008db, type: 3}
+  customerName: Toast
+  customerPrefab: {fileID: 7940063520985271430, guid: cc8b8e75c640a9d4d97c9145237803da, type: 3}
   guaranteedBugType: {fileID: 11400000, guid: acc2f137713a54d4a9913791eaa69e44, type: 2}
   guaranteedAmount: 1
   randomRollCount: 0

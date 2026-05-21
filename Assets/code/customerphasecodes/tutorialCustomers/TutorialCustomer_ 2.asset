@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 632547174a3b11340a13d6d0e124664f, type: 3}
   m_Name: TutorialCustomer_ 2
   m_EditorClassIdentifier: 
-  customerName: froggy
-  customerPrefab: {fileID: 9055058353782491243, guid: 6bdb922b89bf64540ab83dc6ed330d6d, type: 3}
+  customerName: Godzilla
+  customerPrefab: {fileID: 7292500338033772513, guid: 67a54791cf0d54e4a83048327326e6e8, type: 3}
   guaranteedBugType: {fileID: 11400000, guid: d1c81cf2530e69146bb9d3c72f43e86f, type: 2}
   guaranteedAmount: 2
   randomRollCount: 1
