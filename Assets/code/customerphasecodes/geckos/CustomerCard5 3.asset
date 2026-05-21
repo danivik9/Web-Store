@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 632547174a3b11340a13d6d0e124664f, type: 3}
   m_Name: CustomerCard5 3
   m_EditorClassIdentifier: 
-  customerName: Pickles
+  customerName: Aleo
   customerPrefab: {fileID: 3717807448273616488, guid: fbd0980f0b0ca9a4983eed192436345b, type: 3}
   guaranteedBugType: {fileID: 11400000, guid: 90e967b140a734e41a26634ab274a5ba, type: 2}
   guaranteedAmount: 2

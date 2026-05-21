@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 632547174a3b11340a13d6d0e124664f, type: 3}
   m_Name: CustomerCard5 5
   m_EditorClassIdentifier: 
-  customerName: Mochi
+  customerName: Bean
   customerPrefab: {fileID: 8742844242015171457, guid: 674ef4b2b266f724ca4cfcbd6013de7a, type: 3}
   guaranteedBugType: {fileID: 11400000, guid: 0a76e0056cff7044ab1fdb4f179c66ed, type: 2}
   guaranteedAmount: 1
