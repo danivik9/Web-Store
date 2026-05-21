@@ -12,22 +12,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 632547174a3b11340a13d6d0e124664f, type: 3}
   m_Name: CustomerCard5 4
   m_EditorClassIdentifier: 
-  customerName: GECKO
-  customerPrefab: {fileID: 8051739534996262146, guid: 07c9b1f2ca043e14989eba7646d8d1b1, type: 3}
-  guaranteedBugType: {fileID: 11400000, guid: 0a76e0056cff7044ab1fdb4f179c66ed, type: 2}
+  customerName: Jelly
+  customerPrefab: {fileID: 4686436006158160987, guid: 3ab0297029b0b8a468c9d4e8648a78a3, type: 3}
+  guaranteedBugType: {fileID: 11400000, guid: d1c81cf2530e69146bb9d3c72f43e86f, type: 2}
   guaranteedAmount: 1
   randomRollCount: 1
   diceTable:
   - minRoll: 2
-    maxRoll: 5
-    bugType: {fileID: 11400000, guid: 0a76e0056cff7044ab1fdb4f179c66ed, type: 2}
-  - minRoll: 6
-    maxRoll: 6
+    maxRoll: 4
     bugType: {fileID: 11400000, guid: d1c81cf2530e69146bb9d3c72f43e86f, type: 2}
+  - minRoll: 5
+    maxRoll: 6
+    bugType: {fileID: 11400000, guid: d9a263b3b9d838541981608bd3c1b563, type: 2}
   - minRoll: 7
     maxRoll: 7
     bugType: {fileID: 11400000, guid: 90e967b140a734e41a26634ab274a5ba, type: 2}
   - minRoll: 8
-    maxRoll: 12
+    maxRoll: 9
     bugType: {fileID: 11400000, guid: acc2f137713a54d4a9913791eaa69e44, type: 2}
-  penalty: 12
+  - minRoll: 10
+    maxRoll: 12
+    bugType: {fileID: 11400000, guid: 0a76e0056cff7044ab1fdb4f179c66ed, type: 2}
+  penalty: 4
