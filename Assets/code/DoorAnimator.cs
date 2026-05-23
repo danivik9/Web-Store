@@ -7,36 +7,23 @@ public class DoorAnimator : MonoBehaviour
     public float closedAngle = 0f;
     public float openAngle = 90f;
     public float speed = 5f;
-    public float autoCloseDelay = 1.5f;
 
     private bool isOpen = false;
     private Coroutine currentRoutine;
-    private Coroutine autoCloseRoutine;
 
-    public void Open(bool autoClose = true)
+    public void Open(bool unused = true)
     {
-        // Reset auto-close timer even if already open
-        if (autoCloseRoutine != null) StopCoroutine(autoCloseRoutine);
-
-        if (!isOpen)
-        {
-            isOpen = true;
-            if (currentRoutine != null) StopCoroutine(currentRoutine);
-            currentRoutine = StartCoroutine(RotateTo(openAngle));
-        }
-
-        if (autoClose)
-            autoCloseRoutine = StartCoroutine(AutoClose());
+        if (isOpen) return;
+        isOpen = true;
+        if (currentRoutine != null) StopCoroutine(currentRoutine);
+        currentRoutine = StartCoroutine(RotateTo(openAngle));
     }
 
     public void Close()
     {
         if (!isOpen) return;
         isOpen = false;
-
         if (currentRoutine != null) StopCoroutine(currentRoutine);
-        if (autoCloseRoutine != null) StopCoroutine(autoCloseRoutine);
-
         currentRoutine = StartCoroutine(RotateTo(closedAngle));
     }
 
@@ -44,22 +31,7 @@ public class DoorAnimator : MonoBehaviour
     {
         isOpen = false;
         if (currentRoutine != null) StopCoroutine(currentRoutine);
-        if (autoCloseRoutine != null) StopCoroutine(autoCloseRoutine);
         transform.localRotation = Quaternion.Euler(0f, closedAngle, 0f);
-    }
-
-    public void OpenForDuration(float duration)
-    {
-        if (autoCloseRoutine != null) StopCoroutine(autoCloseRoutine);
-
-        if (!isOpen)
-        {
-            isOpen = true;
-            if (currentRoutine != null) StopCoroutine(currentRoutine);
-            currentRoutine = StartCoroutine(RotateTo(openAngle));
-        }
-
-        autoCloseRoutine = StartCoroutine(CloseAfter(duration));
     }
 
     IEnumerator RotateTo(float targetAngle)
@@ -75,18 +47,6 @@ public class DoorAnimator : MonoBehaviour
             yield return null;
         }
         transform.localRotation = target;
-    }
-
-    IEnumerator AutoClose()
-    {
-        yield return new WaitForSeconds(autoCloseDelay);
-        Close();
-    }
-
-    IEnumerator CloseAfter(float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        Close();
     }
 
     public bool IsOpen() => isOpen;

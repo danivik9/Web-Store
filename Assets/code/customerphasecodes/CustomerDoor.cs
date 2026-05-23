@@ -3,6 +3,7 @@
 public class CustomerDoor : MonoBehaviour, IInteractable
 {
     public DoorAnimator doorAnimator;
+    public DoorTrigger doorTrigger;
 
     public static CustomerDoor Instance;
 
@@ -15,12 +16,24 @@ public class CustomerDoor : MonoBehaviour, IInteractable
     {
         if (GameManager.Instance.currentPhase != GamePhase.Preparation)
             return "Store is already open";
+
+        CarrySystem carry = FindObjectOfType<CarrySystem>();
+        if (carry != null && carry.TotalCarried() > 0)
+            return "Put away your bugs before opening the store!";
+
         return "Press E to open store for customers";
     }
 
     public void Interact()
     {
         if (GameManager.Instance.currentPhase != GamePhase.Preparation) return;
+
+        CarrySystem carry = FindObjectOfType<CarrySystem>();
+        if (carry != null && carry.TotalCarried() > 0)
+        {
+            UIManager.Instance.ShowTimedPrompt("Put your bugs away before opening the store!");
+            return;
+        }
 
         if (GameManager.Instance.isRound0 &&
             TutorialManager.Instance != null &&
@@ -42,5 +55,7 @@ public class CustomerDoor : MonoBehaviour, IInteractable
     {
         if (doorAnimator != null)
             doorAnimator.ForceClose();
+        if (doorTrigger != null)
+            doorTrigger.ResetTrigger();
     }
 }

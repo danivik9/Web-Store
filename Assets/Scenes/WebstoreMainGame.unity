@@ -4832,7 +4832,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0.12, y: -0.81, z: 3.89}
-  m_LocalScale: {x: 1.9931899, y: 3.4875, z: 3.525}
+  m_LocalScale: {x: 17.513163, y: 3.4875, z: 3.525}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2124653326}
@@ -12461,7 +12461,6 @@ MonoBehaviour:
   closedAngle: 0
   openAngle: -90
   speed: 5
-  autoCloseDelay: 1.5
 --- !u!1 &1048867214
 GameObject:
   m_ObjectHideFlags: 0
@@ -13991,7 +13990,6 @@ MonoBehaviour:
   closedAngle: 0
   openAngle: 90
   speed: 5
-  autoCloseDelay: 1.5
 --- !u!4 &1177718186
 Transform:
   m_ObjectHideFlags: 0
@@ -14340,8 +14338,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1206373208}
-  - component: {fileID: 1206373207}
   - component: {fileID: 1206373206}
+  - component: {fileID: 1206373209}
   m_Layer: 0
   m_Name: StorageDoorTrigger
   m_TagString: Untagged
@@ -14368,21 +14366,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 5.7285624, y: 2.254548, z: 2.5894787}
-  m_Center: {x: -3.9386792, y: -0.6272745, z: 1.2528499}
---- !u!114 &1206373207
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1206373205}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f51cb1fbc73a624408f777fb10f5d0f0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  doorAnimator: {fileID: 1177718185}
+  m_Size: {x: 4.4593573, y: 3.2765198, z: 1.9486227}
+  m_Center: {x: -3.600224, y: -0.11628866, z: 1.2339058}
 --- !u!4 &1206373208
 Transform:
   m_ObjectHideFlags: 0
@@ -14398,6 +14383,23 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1206373209
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1206373205}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1cd7a9cdeed1e014bb6f96dbb96b22ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  doorAnimator: {fileID: 1177718185}
+  reactToPlayer: 1
+  reactToCustomers: 0
+  useStayOpen: 1
+  autoCloseDelay: 1.5
 --- !u!1 &1210460731 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 811d50d19d54c5141bbbf6d6248ac933, type: 3}
@@ -19012,6 +19014,8 @@ MonoBehaviour:
   doorAnimator: {fileID: 1047243708}
   reactToPlayer: 0
   reactToCustomers: 1
+  useStayOpen: 1
+  autoCloseDelay: 1.5
 --- !u!65 &1781322668
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -19031,8 +19035,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 3.469624, y: 3.7910392, z: 2.6731074}
-  m_Center: {x: -0.17837214, y: 1.3955196, z: 1.2958382}
+  m_Size: {x: 2.7692418, y: 3.4846225, z: 2.0894563}
+  m_Center: {x: 0.376096, y: 1.2423112, z: 1.2082905}
 --- !u!4 &1781322669
 Transform:
   m_ObjectHideFlags: 0
@@ -19042,7 +19046,7 @@ Transform:
   m_GameObject: {fileID: 1781322666}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 7.85, y: -0.19, z: 0.33}
+  m_LocalPosition: {x: 7.85, y: 0.22, z: 0.33}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -25788,6 +25792,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   doorAnimator: {fileID: 1047243708}
+  doorTrigger: {fileID: 0}
 --- !u!4 &6607889432209202361
 Transform:
   m_ObjectHideFlags: 0
