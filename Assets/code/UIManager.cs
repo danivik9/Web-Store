@@ -5,6 +5,7 @@ using System.Collections;
 public class UIManager : MonoBehaviour
 {
     public static UIManager Instance;
+    public static bool TooltipsEnabled = true;
 
     [Header("Interaction Prompt")]
     public GameObject promptPanel;
@@ -40,7 +41,6 @@ public class UIManager : MonoBehaviour
     {
         if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive())
             return;
-
         promptText.text = text;
         promptPanel.SetActive(true);
     }
@@ -49,7 +49,6 @@ public class UIManager : MonoBehaviour
     {
         if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive())
             return;
-
         promptText.text = text;
         promptPanel.SetActive(true);
         promptPanel.transform.SetAsLastSibling();

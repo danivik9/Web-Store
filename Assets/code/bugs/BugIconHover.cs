@@ -5,7 +5,6 @@ public class BugIconHover : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
 {
     public BugToken bugToken;
 
-    // For 3D world icons (store shelves)
     void OnMouseEnter()
     {
         ShowTooltip();
@@ -16,7 +15,6 @@ public class BugIconHover : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
         UIManager.Instance.HideTooltip();
     }
 
-    // For UI elements (storage grid)
     public void OnPointerEnter(PointerEventData eventData)
     {
         ShowTooltip();
@@ -29,6 +27,7 @@ public class BugIconHover : MonoBehaviour, IPointerEnterHandler, IPointerExitHan
 
     void ShowTooltip()
     {
+        if (!UIManager.TooltipsEnabled) return;
         if (bugToken == null) return;
 
         int currentRound = GameManager.Instance.currentRound;

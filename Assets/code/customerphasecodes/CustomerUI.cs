@@ -97,6 +97,7 @@ public class CustomerUI : MonoBehaviour
         isAtRegister = true;
         InteractionManager.IsLocked = true;
         UIManager.Instance.HidePrompt();
+        UIManager.TooltipsEnabled = false;
         spiderMovement.enabled = false;
         spiderObject.SetActive(false);
 
@@ -114,6 +115,7 @@ public class CustomerUI : MonoBehaviour
     {
         isAtRegister = false;
         InteractionManager.IsLocked = false;
+        UIManager.TooltipsEnabled = true;
         spiderObject.SetActive(true);
         spiderMovement.enabled = true;
         cameraFollow.ReturnToFollow();
