@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class SpiderMovement : MonoBehaviour
 {
@@ -21,16 +21,13 @@ public class SpiderMovement : MonoBehaviour
 
     void Update()
     {
-        // Get input
-        float horizontal = Input.GetAxisRaw("Horizontal"); // A/D
-        float vertical = Input.GetAxisRaw("Vertical");     // W/S
+        float horizontal = Input.GetAxisRaw("Horizontal");
+        float vertical = Input.GetAxisRaw("Vertical");
 
-        // Build movement direction relative to camera
         Camera cam = Camera.main;
         Vector3 camForward = cam.transform.forward;
         Vector3 camRight = cam.transform.right;
 
-        // Flatten so spider doesn't move up/down with camera angle
         camForward.y = 0f;
         camRight.y = 0f;
         camForward.Normalize();
@@ -38,24 +35,22 @@ public class SpiderMovement : MonoBehaviour
 
         moveDirection = (camForward * vertical + camRight * horizontal).normalized;
 
-        // Update animation
         if (animator != null)
             animator.SetBool("IsWalking", moveDirection.sqrMagnitude > 0.01f);
     }
 
     void FixedUpdate()
     {
-        // Move
-        rb.MovePosition(rb.position + moveDirection * moveSpeed * Time.fixedDeltaTime);
+        // ── Velocity-based movement — respects colliders ──
+        rb.linearVelocity = moveDirection * moveSpeed;
 
-        // Rotate to face movement direction
+        // ── Rotate to face movement direction ──
         if (moveDirection.sqrMagnitude > 0.01f)
         {
             Quaternion targetRotation = Quaternion.LookRotation(moveDirection);
-            Quaternion offset = Quaternion.Euler(0f, 0f, 0f); // your correction
             rb.rotation = Quaternion.Slerp(
                 rb.rotation,
-                targetRotation * offset,
+                targetRotation,
                 rotationSpeed * Time.fixedDeltaTime
             );
         }
