@@ -12,11 +12,10 @@ public class DayBreakdownUI : MonoBehaviour
     public GameObject breakdownPanel;
 
     [Header("Text Fields")]
+    public TextMeshProUGUI titleText;
     public TextMeshProUGUI customersServedText;
     public TextMeshProUGUI customersFailedText;
     public TextMeshProUGUI roundEarningsText;
-    public TextMeshProUGUI expiredItemsText;
-    public TextMeshProUGUI expiredPenaltyText;
     public TextMeshProUGUI netResultText;
     public TextMeshProUGUI dayLogText;
 
@@ -51,6 +50,9 @@ public class DayBreakdownUI : MonoBehaviour
         breakdownPanel.SetActive(true);
         InteractionManager.IsLocked = true;
 
+        int currentRound = GameManager.Instance.currentRound;
+        titleText.text = $"— Day {currentRound} Breakdown —";
+
         totalPenalties = GameManager.Instance.GetPendingPenalties();
         totalEarnings = earnings;
         expiredPenalty = 0f;
@@ -62,8 +64,6 @@ public class DayBreakdownUI : MonoBehaviour
         customersServedText.text = "";
         customersFailedText.text = "";
         roundEarningsText.text = "";
-        expiredItemsText.text = "";
-        expiredPenaltyText.text = "";
         netResultText.text = "";
         dayLogText.text = "";
 
@@ -83,8 +83,6 @@ public class DayBreakdownUI : MonoBehaviour
         yield return StartCoroutine(TypeText(customersFailedText, $"Customers Failed: {failed}"));
         yield return new WaitForSeconds(0.1f);
         yield return StartCoroutine(TypeText(roundEarningsText, $"Sales Earnings: ${earnings:F2}"));
-        yield return new WaitForSeconds(0.1f);
-        yield return StartCoroutine(TypeText(expiredItemsText, "Expired items calculated at end of day..."));
         yield return new WaitForSeconds(0.1f);
         yield return StartCoroutine(TypeText(netResultText, $"Customer Earnings: ${net:F2}"));
         yield return new WaitForSeconds(0.2f);
@@ -167,7 +165,6 @@ public class DayBreakdownUI : MonoBehaviour
         });
     }
 
-    // ── Spider Reset (public so GameManager can call it) ───
     public void ResetSpiderPublic()
     {
         SpiderMovement spider = FindObjectOfType<SpiderMovement>();
