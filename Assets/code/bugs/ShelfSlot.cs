@@ -4,11 +4,13 @@ public class ShelfSlot : MonoBehaviour
 {
     [Header("Slot Settings")]
     public BugToken bugToken;
-    public bool isOccupied => bugToken != null && bugToken.bugType != null; // ← fixed
+    public bool isOccupied => bugToken != null && bugToken.bugType != null;
 
     [Header("Visuals")]
     public GameObject iconObject;
     public float hoverHeight = 0.3f;
+    public float targetSize = 0.8f;
+
     private SpriteRenderer spriteRenderer;
 
     public bool IsEmpty() => !isOccupied;
@@ -44,13 +46,27 @@ public class ShelfSlot : MonoBehaviour
         iconObject = new GameObject("BugIcon");
         iconObject.transform.SetParent(transform);
         iconObject.transform.localPosition = Vector3.up * hoverHeight;
-        iconObject.transform.localScale = Vector3.one * 0.15f; // ← added
 
         spriteRenderer = iconObject.AddComponent<SpriteRenderer>();
         spriteRenderer.sprite = bugToken.bugType.icon;
         spriteRenderer.sortingOrder = 1;
 
-        iconObject.AddComponent<BoxCollider>();
+        // ── Normalize size so all bugs look the same ──
+        Bounds bounds = spriteRenderer.bounds;
+        float largestSide = Mathf.Max(bounds.size.x, bounds.size.y);
+        if (largestSide > 0f)
+        {
+            float uniformScale = targetSize / largestSide;
+            iconObject.transform.localScale = Vector3.one * uniformScale;
+        }
+
+        // ── Fixed-size collider — thick enough for camera raycast ──
+        BoxCollider col = iconObject.AddComponent<BoxCollider>();
+        col.isTrigger = true;
+        float scale = iconObject.transform.localScale.x;
+        float colSize = targetSize / scale;
+        col.size = new Vector3(colSize * 2f, colSize * 2f, colSize * 2f);
+
         iconObject.AddComponent<FaceCamera>();
 
         var hover = iconObject.AddComponent<BugIconHover>();
