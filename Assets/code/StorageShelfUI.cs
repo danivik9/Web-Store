@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Collections;
 using System.Collections.Generic;
 
 public class StorageShelfUI : MonoBehaviour
@@ -26,6 +27,11 @@ public class StorageShelfUI : MonoBehaviour
     [Header("Camera Pan")]
     public Vector3 shelfCameraPosition;
     public Vector3 shelfCameraRotation;
+
+    [Header("Grid Animation")]
+    public float animDelay = 0.5f;
+    public float animDuration = 0.2f;
+    public float animStagger = 0.05f;
 
     private List<BugToken> selectedTokens = new List<BugToken>();
     private List<GameObject> spawnedSlots = new List<GameObject>();
@@ -77,12 +83,14 @@ public class StorageShelfUI : MonoBehaviour
         );
 
         UpdateGrid();
+        StartCoroutine(AnimateGridIn(animDelay, animDuration));
         UpdateSelectedCount();
         TutorialManager.Instance?.OnStorageOpened();
     }
 
     public void CloseShelf()
     {
+        StopAllCoroutines();
         InteractionManager.IsLocked = false;
         storagePanel.SetActive(false);
 
@@ -149,6 +157,40 @@ public class StorageShelfUI : MonoBehaviour
                 if (txt != null) txt.text = "";
             }
         }
+    }
+
+    // ── Grid Animation ─────────────────────────────
+
+    IEnumerator AnimateGridIn(float delay, float duration)
+    {
+        foreach (GameObject slot in spawnedSlots)
+        {
+            if (slot != null)
+                slot.transform.localScale = Vector3.zero;
+        }
+
+        yield return new WaitForSeconds(delay);
+
+        for (int i = 0; i < spawnedSlots.Count; i++)
+        {
+            if (spawnedSlots[i] == null) continue;
+            StartCoroutine(ScaleIn(spawnedSlots[i].transform, duration));
+            yield return new WaitForSeconds(animStagger);
+        }
+    }
+
+    IEnumerator ScaleIn(Transform target, float duration)
+    {
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float t = elapsed / duration;
+            float ease = 1f - Mathf.Pow(1f - t, 3f);
+            target.localScale = Vector3.one * ease;
+            yield return null;
+        }
+        target.localScale = Vector3.one;
     }
 
     // ── Selection ──────────────────────────────────
