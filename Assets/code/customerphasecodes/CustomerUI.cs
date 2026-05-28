@@ -76,7 +76,6 @@ public class CustomerUI : MonoBehaviour
         restockButton.gameObject.SetActive(false);
 
         restockButton.onClick.AddListener(OnRestock);
-        rollDiceButton.onClick.AddListener(() => StartCoroutine(RollDice()));
         cantServeButton.onClick.AddListener(OnCantServe);
     }
 
@@ -249,7 +248,6 @@ public class CustomerUI : MonoBehaviour
         customerNameText.text = card.customerName;
 
         rollDiceButton.gameObject.SetActive(false);
-        rollDiceButton.interactable = true;
         cantServeButton.gameObject.SetActive(true);
         diceResultText.text = "";
 
@@ -306,6 +304,12 @@ public class CustomerUI : MonoBehaviour
         for (int i = 0; i < count; i++)
         {
             GameObject slot = Instantiate(hiddenSlotPrefab, randomSlotsContainer);
+
+            int capturedIndex = i;
+            var btn = slot.GetComponent<Button>();
+            if (btn != null)
+                btn.onClick.AddListener(() => OnClickHiddenSlot(capturedIndex));
+
             randomSlotObjects.Add(slot);
         }
 
@@ -372,9 +376,7 @@ public class CustomerUI : MonoBehaviour
 
                 if (currentCard.randomRollCount > 0)
                 {
-                    rollDiceButton.gameObject.SetActive(true);
-                    rollDiceButton.interactable = true;
-                    diceResultText.text = "Roll for mystery items!";
+                    diceResultText.text = "Click a mystery slot to roll!";
                 }
                 else
                 {
@@ -391,6 +393,14 @@ public class CustomerUI : MonoBehaviour
             TutorialManager.Instance?.OnGuaranteedFilled();
             StartCoroutine(FlashSlotRed(slot));
         }
+    }
+
+    void OnClickHiddenSlot(int index)
+    {
+        if (isRolling) return;
+        if (guaranteedFilled < currentCard.guaranteedAmount) return;
+        if (index != currentRandomRollIndex) return;
+        StartCoroutine(RollDice());
     }
 
     void OnClickRandomSlot(BugType bugType, GameObject slot)
@@ -417,9 +427,7 @@ public class CustomerUI : MonoBehaviour
             }
             else
             {
-                rollDiceButton.gameObject.SetActive(true);
-                rollDiceButton.interactable = true;
-                diceResultText.text = "Roll for next item!";
+                diceResultText.text = "Click next mystery slot!";
             }
         }
         else
@@ -434,8 +442,7 @@ public class CustomerUI : MonoBehaviour
     {
         if (isRolling) yield break;
         isRolling = true;
-        rollDiceButton.interactable = false;
-        cantServeButton.interactable = false;  // ← here at the top
+        cantServeButton.interactable = false;
 
         float elapsed = 0f;
         while (elapsed < diceSpinDuration)
@@ -490,8 +497,7 @@ public class CustomerUI : MonoBehaviour
 
         currentRandomRollIndex++;
         isRolling = false;
-        rollDiceButton.gameObject.SetActive(false);
-        cantServeButton.interactable = true;   // ← here at the bottom
+        cantServeButton.interactable = true;
     }
 
     // ── Can't Serve ────────────────────────────────

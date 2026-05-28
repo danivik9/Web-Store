@@ -131,7 +131,7 @@ TextureImporter:
         width: 1615
         height: 2383
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -153,7 +153,7 @@ TextureImporter:
         width: 1577
         height: 436
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -175,7 +175,7 @@ TextureImporter:
         width: 818
         height: 251
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -192,13 +192,13 @@ TextureImporter:
       name: settings_ui_3
       rect:
         serializedVersion: 2
-        x: 2587
-        y: 926
-        width: 844
-        height: 991
+        x: 2714
+        y: 965
+        width: 655
+        height: 856
       alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 46, y: 81, z: 61, w: 66}
       customData: 
       outline: []
       physicsShape: []
@@ -219,7 +219,7 @@ TextureImporter:
         width: 813
         height: 855
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []

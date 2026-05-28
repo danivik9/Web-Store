@@ -424,7 +424,14 @@ public class TutorialManager : MonoBehaviour
     public bool IsDoorStepReached() => !isActive || currentStep >= 18;
     public bool IsCantServeAllowed() => !isActive || currentStep >= CANT_SERVE_STEP;
     public bool IsRestockAllowed() => !isActive || currentStep >= 28;
-    public bool IsCustomerSelectionAllowed() => !isActive || currentStep != 28;
+    public bool IsCustomerSelectionAllowed()
+    {
+        if (!isActive) return true;
+        if (currentStep >= steps.Length) return true;
+        if (steps[currentStep].trigger == TutorialTrigger.Click) return false;
+        if (steps[currentStep].trigger == TutorialTrigger.RestockUsed) return false;
+        return true;
+    }
 
     // ── Trigger Hooks ──────────────────────────────
 
