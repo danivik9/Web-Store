@@ -36,9 +36,10 @@ public class EndScreenUI : MonoBehaviour
 
     public void ShowEnding(float finalMoney)
     {
-        Debug.Log($"ShowEnding called! Money: {finalMoney}"); // ← debug
+        Debug.Log($"ShowEnding called! Money: {finalMoney}");
         endPanel.SetActive(true);
         InteractionManager.IsLocked = true;
+        UIManager.TooltipsEnabled = false;
 
         finalMoneyText.text = $"Final Balance: ${finalMoney:F2}";
 
@@ -75,6 +76,7 @@ public class EndScreenUI : MonoBehaviour
     void OnRestart()
     {
         InteractionManager.IsLocked = false;
+        UIManager.TooltipsEnabled = true;
         SceneManager.LoadScene("MainMenu");
     }
 }
