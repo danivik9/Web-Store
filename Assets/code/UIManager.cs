@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using TMPro;
 using System.Collections;
 
@@ -37,8 +37,11 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    // ── Prompts ────────────────────────────────────
+
     public void ShowPrompt(string text)
     {
+        if (timedPromptCoroutine != null) return;
         if (TutorialManager.Instance != null && TutorialManager.Instance.IsTutorialActive())
             return;
         promptText.text = text;
@@ -75,6 +78,8 @@ public class UIManager : MonoBehaviour
         promptPanel.SetActive(false);
     }
 
+    // ── HUD ────────────────────────────────────────
+
     public void UpdateMoneyDisplay(float amount)
     {
         moneyText.text = $"${amount:F2}";
@@ -84,6 +89,8 @@ public class UIManager : MonoBehaviour
     {
         roundText.text = $"Round {round}/{maxRounds}";
     }
+
+    // ── Tooltip ────────────────────────────────────
 
     public void ShowTooltip(string bugName, string expiry)
     {

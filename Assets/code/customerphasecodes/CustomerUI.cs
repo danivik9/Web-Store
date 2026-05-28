@@ -75,19 +75,9 @@ public class CustomerUI : MonoBehaviour
         stockStickyNote.SetActive(false);
         restockButton.gameObject.SetActive(false);
 
-        restockButton.onClick.AddListener(() =>
-        {
-            if (TutorialManager.Instance != null && !TutorialManager.Instance.IsRestockAllowed()) return;
-            OnRestock();
-        });
-
+        restockButton.onClick.AddListener(OnRestock);
         rollDiceButton.onClick.AddListener(() => StartCoroutine(RollDice()));
-
-        cantServeButton.onClick.AddListener(() =>
-        {
-            if (TutorialManager.Instance != null && !TutorialManager.Instance.IsCantServeAllowed()) return;
-            OnCantServe();
-        });
+        cantServeButton.onClick.AddListener(OnCantServe);
     }
 
     // ── Camera ─────────────────────────────────────
@@ -183,6 +173,11 @@ public class CustomerUI : MonoBehaviour
                     btn.onClick.AddListener(() =>
                     {
                         if (!isAtRegister) return;
+                        if (TutorialManager.Instance != null && !TutorialManager.Instance.IsCustomerSelectionAllowed())
+                        {
+                            UIManager.Instance.ShowTimedPrompt("Use the Restock button first!");
+                            return;
+                        }
                         CustomerPhaseManager.Instance.SelectCustomer(captured);
                     });
                 }
@@ -440,6 +435,7 @@ public class CustomerUI : MonoBehaviour
         if (isRolling) yield break;
         isRolling = true;
         rollDiceButton.interactable = false;
+        cantServeButton.interactable = false;  // ← here at the top
 
         float elapsed = 0f;
         while (elapsed < diceSpinDuration)
@@ -495,12 +491,18 @@ public class CustomerUI : MonoBehaviour
         currentRandomRollIndex++;
         isRolling = false;
         rollDiceButton.gameObject.SetActive(false);
+        cantServeButton.interactable = true;   // ← here at the bottom
     }
 
     // ── Can't Serve ────────────────────────────────
 
     void OnCantServe()
     {
+        if (TutorialManager.Instance != null && !TutorialManager.Instance.IsCantServeAllowed())
+        {
+            UIManager.Instance.ShowTimedPrompt("Fill the guaranteed slots first!");
+            return;
+        }
         CustomerPhaseManager.Instance.FailCustomer();
     }
 
@@ -508,6 +510,11 @@ public class CustomerUI : MonoBehaviour
 
     void OnRestock()
     {
+        if (TutorialManager.Instance != null && !TutorialManager.Instance.IsRestockAllowed())
+        {
+            UIManager.Instance.ShowTimedPrompt("Follow the tutorial steps first!");
+            return;
+        }
         if (CustomerPhaseManager.Instance.HasActiveCustomer())
         {
             UIManager.Instance.ShowTimedPrompt("Can't restock while serving a customer!");

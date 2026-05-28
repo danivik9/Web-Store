@@ -62,6 +62,7 @@ public class MorningReportUI : MonoBehaviour
         morningPanel.SetActive(true);
         InteractionManager.IsLocked = true;
         continueButton.interactable = false;
+        UIManager.TooltipsEnabled = false;
 
         // Clear text
         roundText.text = "";
@@ -127,5 +128,6 @@ public class MorningReportUI : MonoBehaviour
         if (isTyping) return;
         morningPanel.SetActive(false);
         InteractionManager.IsLocked = false;
+        UIManager.TooltipsEnabled = true;
     }
 }

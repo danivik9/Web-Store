@@ -49,6 +49,7 @@ public class DayBreakdownUI : MonoBehaviour
     {
         breakdownPanel.SetActive(true);
         InteractionManager.IsLocked = true;
+        UIManager.TooltipsEnabled = false;
 
         int currentRound = GameManager.Instance.currentRound;
         titleText.text = $"— Day {currentRound} Breakdown —";
@@ -131,6 +132,7 @@ public class DayBreakdownUI : MonoBehaviour
 
         breakdownPanel.SetActive(false);
         InteractionManager.IsLocked = false;
+        UIManager.TooltipsEnabled = true;
 
         CustomerSpawner.Instance.WalkAllOut();
 

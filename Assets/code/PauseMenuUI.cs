@@ -26,6 +26,7 @@ public class PauseMenuUI : MonoBehaviour
     {
         pausePanel.SetActive(false);
 
+
         pauseButton.onClick.AddListener(OnPause);
         resumeButton.onClick.AddListener(OnResume);
         restartButton.onClick.AddListener(OnRestart);
@@ -42,6 +43,8 @@ public class PauseMenuUI : MonoBehaviour
     {
         pausePanel.SetActive(false);
         InteractionManager.IsLocked = false;
+        UIManager.TooltipsEnabled = false;
+        UIManager.TooltipsEnabled = true;
     }
 
     void OnRestart()

@@ -46,7 +46,7 @@ public class GameManager : MonoBehaviour
         CobwebManager.Instance.DrawNextCard();
         StartPhase(GamePhase.Preparation);
 
-        FadeManager.Instance.FadeFromBlack(); // ← fade in when game starts
+        FadeManager.Instance.FadeFromBlack();
     }
 
     // ── Phase Control ──────────────────────────────
@@ -165,6 +165,11 @@ public class GameManager : MonoBehaviour
 
         SpiderMovement spider = FindObjectOfType<SpiderMovement>();
         if (spider != null) spider.enabled = true;
+
+        // ── Reset door and interaction state ──
+        CustomerDoor.Instance?.CloseDoor();
+        InteractionManager.IsLocked = false;
+        UIManager.TooltipsEnabled = true;
 
         currentRound = 1;
         currentMoney = 15f;

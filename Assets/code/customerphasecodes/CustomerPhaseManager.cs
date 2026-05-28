@@ -164,6 +164,8 @@ public class CustomerPhaseManager : MonoBehaviour
 
     public BugType RollForRandomItem()
     {
+        if (activeCustomer == null) return null;
+
         int roll = Random.Range(1, 7) + Random.Range(1, 7);
         BugType result = activeCustomer.GetBugForRoll(roll);
         Debug.Log($"Rolled {roll} → {(result != null ? result.bugName : "nothing")}");
