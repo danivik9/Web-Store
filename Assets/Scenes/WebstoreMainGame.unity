@@ -5861,7 +5861,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: cant serve lol
+  m_text: can't serve
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 77e53ddac1b6bf64c95df787e8d21c34, type: 2}
   m_sharedMaterial: {fileID: -1576631359121259500, guid: 77e53ddac1b6bf64c95df787e8d21c34, type: 2}
