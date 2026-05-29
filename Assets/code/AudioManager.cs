@@ -27,6 +27,7 @@ public class AudioManager : MonoBehaviour
 
     public void SetMusicVolume(float value)
     {
+        Debug.Log($"SetMusicVolume called with value: {value}");
         MusicVolume = value;
         PlayerPrefs.SetFloat(KEY_MUSIC, value);
         ApplyVolume();
@@ -40,7 +41,11 @@ public class AudioManager : MonoBehaviour
 
     void ApplyVolume()
     {
+        Debug.Log($"ApplyVolume — musicSource null? {musicSource == null}, volume: {MusicVolume}");
         if (musicSource != null)
+        {
             musicSource.volume = MusicVolume;
+            Debug.Log($"musicSource isPlaying? {musicSource.isPlaying}, gameObject: {musicSource.gameObject.name}");
+        }
     }
 }
